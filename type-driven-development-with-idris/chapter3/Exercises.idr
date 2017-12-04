@@ -22,3 +22,17 @@ my_map f (x :: xs) = f x :: my_map f xs
 total my_vect_map : (a -> b) -> Vect n a -> Vect n b
 my_vect_map f [] = []
 my_vect_map f (x :: xs) = f x :: my_vect_map f xs
+
+--------------------------------------------------------------------------------
+-- Exercises 3.3
+--------------------------------------------------------------------------------
+
+total transposeMatrix : Vect n (Vect m a) -> Vect m (Vect n a)
+transposeMatrix [] = replicate _ []
+transposeMatrix (x :: xs) = zipWith (::) x $ transposeMatrix xs
+
+total addMatrix : Num a => Vect n (Vect m a) -> Vect n (Vect m a) -> Vect n (Vect m a)
+addMatrix [] [] = []
+addMatrix (x :: xs) (y :: ys) = zipWith (+) x y :: addMatrix xs ys
+
+
