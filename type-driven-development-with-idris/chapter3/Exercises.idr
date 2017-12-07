@@ -35,13 +35,10 @@ total addMatrix : Num a => Vect n (Vect m a) -> Vect n (Vect m a) -> Vect n (Vec
 addMatrix [] [] = []
 addMatrix (x :: xs) (y :: ys) = zipWith (+) x y :: addMatrix xs ys
 
-total multMatRow : Num a => (x : Vect m a) -> (ys : Vect p (Vect m a)) -> Vect p a
-multMatRow x [] = []
-multMatRow x (y :: ys) = foldl (+) 0 (zipWith (*) x y) :: multMatRow x ys
-
-total multMatHelper : Num a => (xs : Vect n (Vect m a)) -> (ys : Vect p (Vect m a)) -> Vect n (Vect p a)
-multMatHelper [] ys = []
-multMatHelper (x :: xs) ys = multMatRow x ys :: multMatHelper xs ys
+total multMatrixRow : Num a => (x : Vect m a) -> (ys : Vect p (Vect m a)) -> Vect p a
+multMatrixRow x [] = []
+multMatrixRow x (y :: ys) = foldl (+) 0 (zipWith (*) x y) :: multMatrixRow x ys
 
 total multMatrix : Num a => Vect n (Vect m a) -> Vect m (Vect p a) -> Vect n (Vect p a)
-multMatrix xs ys = multMatHelper xs $ transposeMatrix ys
+multMatrix [] ys = []
+multMatrix (x :: xs) ys = multMatrixRow x (transposeMatrix ys) :: multMatrix xs ys
