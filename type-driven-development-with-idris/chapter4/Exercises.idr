@@ -1,3 +1,5 @@
+import Data.Vect
+
 data Tree elem = Empty
                | Node (Tree elem) elem (Tree elem)
                
@@ -63,3 +65,39 @@ biggestTriangle (Primitive _) = Nothing
 biggestTriangle (Combine x y) = maxMaybe (biggestTriangle x) (biggestTriangle y)
 biggestTriangle (Rotate _ pic) = biggestTriangle pic
 biggestTriangle (Translate _ _ pic) = biggestTriangle pic
+
+--------------------------------------------------------------------------------
+-- Exercises 4.2
+--------------------------------------------------------------------------------
+
+data PowerSource = Petrol
+                 | Pedal
+                 | Electric
+
+data Vehicle : PowerSource -> Type where
+  Bicycle : Vehicle Pedal
+  Unicycle : Vehicle Pedal
+  Car : (fuel : Nat) -> Vehicle Petrol
+  Motorcycle : (fuel : Nat) -> Vehicle Petrol
+  Bus : (fuel : Nat) -> Vehicle Petrol
+  
+total wheels : Vehicle power -> Nat
+wheels Bicycle = 2
+wheels Unicycle = 1
+wheels (Car fuel) = 4
+wheels (Motorcycle fuel) = 2
+wheels (Bus fuel) = 4
+
+total refuel : Vehicle Petrol -> Vehicle Petrol
+refuel (Car fuel) = Car 100
+refuel (Motorcycle fuel) = Motorcycle 50
+refuel (Bus fuel) = Bus 200
+
+total vectTake : (n : Nat) -> Vect (n + m) a -> Vect n a
+vectTake Z xs = []
+vectTake (S k) (x :: xs) = x :: vectTake k xs
+
+total sumEntries : Num a => (pos: Nat) -> Vect n a -> Vect n a -> Maybe a
+sumEntries _ [] _ = Nothing
+sumEntries Z (x :: xs) (y :: ys) = Just (x + y)
+sumEntries (S k) (x :: xs) (y :: ys) = sumEntries k xs ys
