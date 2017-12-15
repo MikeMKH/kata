@@ -19,6 +19,7 @@ addToStore (MkData size store) newitem = MkData _ (addToData store) where
 data Command = Add String
              | Get Integer
              | Size
+             | Search String
              | Quit
              
 parseCommand : String -> String -> Maybe Command
@@ -28,6 +29,7 @@ parseCommand "get" s = case all isDigit (unpack s) of
                          True => Just (Get (cast s))
 parseCommand "quit" _ = Just Quit
 parseCommand "size" _ = Just Size
+parseCommand "search" s = Just (Search s)
 parseCommand _ _ = Nothing
 
 parse : (input : String) -> Maybe Command
@@ -40,6 +42,14 @@ getEntry pos store =
     case integerToFin pos (size store) of
       Nothing => Just ("Out of range\n", store)
       Just id => Just (index id (items store) ++ "\n", store)
+      
+searchStoreString : Nat -> (txt : String) -> (items : Vect n String) -> String
+searchStoreString _ txt [] = ""
+searchStoreString k txt (x :: xs) = 
+  let cont = searchStoreString (S k) txt xs in 
+    if Strings.isInfixOf txt x 
+      then show k ++ ": " ++ x ++ "\n" ++ cont
+      else cont
 
 processInput : DataStore -> String -> Maybe (String, DataStore)
 processInput store input =
@@ -51,8 +61,8 @@ processInput store input =
         addToStore store item)
     Just (Get pos) => getEntry pos store
     Just Size => Just (show (size store) ++ "\n", store)
+    Just (Search txt) => Just (searchStoreString 0 txt (items store), store)
     Just Quit => Nothing
-
--- add search (2, 3)
+    
 main : IO()
 main = replWith (MkData _ []) "Command: " processInput
