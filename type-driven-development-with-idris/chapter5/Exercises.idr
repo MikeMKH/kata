@@ -35,19 +35,26 @@ readNumber = do input <- getLine
                 if all isDigit (unpack input)
                   then pure (Just (cast input))
                   else pure Nothing
+                  
+repl' : (String -> String) -> IO ()
+repl' fn = do putStr "λ "
+              e <- getLine
+              let out = fn e
+              putStrLn out
+              repl' fn
 
-guess : (target : Nat) -> IO ()
-guess target = do putStr "Guess a number: "
-                  Just g <- readNumber | Nothing => do putStrLn "Numbers only"
-                                                       guess target
-                  case compare g target of
-                    LT => do putStrLn "Too low"
-                             guess target
-                    EQ => putStrLn "Correct"
-                    GT => do putStrLn "Too high"
-                             guess target
+guess : (target : Nat) -> (count : Nat) -> IO ()
+guess target count = do putStr $ "Guess a number (count=" ++ show count ++ "): "
+                        Just g <- readNumber | Nothing => do putStrLn "Numbers only"
+                                                             guess target $ S count
+                        case compare g target of
+                          LT => do putStrLn "Too low"
+                                   guess target $ S count
+                          EQ => putStrLn "Correct"
+                          GT => do putStrLn "Too high"
+                                   guess target $ S count
 
 main : IO ()
 main = do
   n <- time
-  guess (cast (mod n 100))
+  guess (cast (mod n 100)) Z
