@@ -74,7 +74,7 @@ readToBlank = do x <- getLine
 readAndSave : IO ()
 readAndSave = do xs <- readToBlank
                  name <- getLine
-                 Right f <- writeFile name (unlines xs) | Left err => printLn err
+                 Right f <- writeFile name $ unlines xs | Left err => printLn err
                  pure ()
 
 readVectFile : (filename : String) -> IO (n ** Vect n String)
