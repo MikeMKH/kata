@@ -36,13 +36,6 @@ readNumber = do input <- getLine
                 if all isDigit (unpack input)
                   then pure (Just (cast input))
                   else pure Nothing
-                  
-repl' : (String -> String) -> IO ()
-repl' fn = do putStr "λ "
-              e <- getLine
-              let out = fn e
-              putStrLn out
-              repl' fn
 
 guess : (target : Nat) -> (count : Nat) -> IO ()
 guess target count = do putStr $ "Guess a number (count=" ++ show count ++ "): "
@@ -60,6 +53,13 @@ main = do
   n <- time
   guess (cast (mod n 100)) Z
   
+repl' : (String -> String) -> IO ()
+repl' fn = do putStr "λ "
+              e <- getLine
+              let out = fn e
+              putStrLn out
+              repl' fn
+
 --------------------------------------------------------------------------------
 -- Exercises 5.3
 --------------------------------------------------------------------------------
@@ -74,8 +74,11 @@ readToBlank = do x <- getLine
 readAndSave : IO ()
 readAndSave = do xs <- readToBlank
                  name <- getLine
-                 Right f <- writeFile name (unlines xs) | Left err => putStrLn (show err)
-                 return ()
+                 Right f <- writeFile name (unlines xs) | Left err => printLn err
+                 pure ()
 
--- readVectFile : (filename : String) -> IO (n ** Vect n String)
--- readVectFile filename = 
+readVectFile : (filename : String) -> IO (n ** Vect n String)
+readVectFile filename = do Right h <- readFile filename
+                            | Left err => do printLn err
+                                             pure (_ ** [])
+                           pure (_ ** fromList $ lines h)
