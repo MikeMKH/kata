@@ -53,6 +53,9 @@ printf fmt = printfFormat _ ""
 testPrintf : Char -> Double -> String
 testPrintf = printf "%c %f"
 
--- 3
--- test : TupleVect 4 Nat
--- test = (1,2,3,4,())
+total TupleVect : (n : Nat) -> (t : Type) -> Type
+TupleVect Z _ = ()
+TupleVect (S k) t = (t, TupleVect k t)
+
+test : TupleVect 4 Nat
+test = (1, 2, 3, 4, ())
