@@ -63,5 +63,8 @@ Show ty => Show (Expr ty) where
   show (Div x y) = showExprFormat "/" (show x) (show y)
   show (Abs x) = "(abs(" ++ show x ++ "))"
 
-  -- 7.2.2
-  -- 7.2.3
+(Eq ty, Neg ty, Integral ty) => Eq (Expr ty) where
+  (==) x y = eval x == eval y
+  
+(Neg num, Integral num) => Cast (Expr num) num where
+  cast = eval
