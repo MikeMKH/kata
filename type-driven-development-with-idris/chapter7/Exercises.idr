@@ -68,3 +68,29 @@ Show ty => Show (Expr ty) where
   
 (Neg num, Integral num) => Cast (Expr num) num where
   cast = eval
+  
+--------------------------------------------------------------------------------
+-- Exercises 7.3
+--------------------------------------------------------------------------------
+
+Functor Expr where
+  map f (Val x)   = Val (f x)
+  map f (Add x y) = Add (map f x) (map f y)
+  map f (Sub x y) = Sub (map f x) (map f y)
+  map f (Mul x y) = Mul (map f x) (map f y)
+  map f (Div x y) = Div (map f x) (map f y)
+  map f (Abs x)   = Abs (map f x)
+  
+data Vect : Nat -> Type -> Type where
+  Nil : Vect Z a
+  (::) : a -> Vect k a -> Vect (S k) a
+
+%name Vect xs, ys
+
+Eq a => Eq (Vect n a) where
+  (==) [] [] = True
+  (==) (x :: xs) (y :: ys) = x == y && xs == ys
+
+Foldable (Vect n) where
+  foldr func init [] = init 
+  foldr func init (x :: xs) = func x (foldr func init xs)
