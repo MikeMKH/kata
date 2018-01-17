@@ -12,24 +12,24 @@ data Last : List a -> a -> Type where
 last123 : Last [1, 2, 3] 3
 last123 = LastCons (LastCons LastOne)
 
-isNotNil : Last [] value -> Void
-isNotNil LastOne impossible
-isNotNil (LastCons _) impossible
+notLastNil : Last [] value -> Void
+notLastNil LastOne impossible
+notLastNil (LastCons _) impossible
 
-isNotLastOne : (contra : (x = value) -> Void) -> Last [x] value -> Void
-isNotLastOne contra LastOne = contra Refl
-isNotLastOne _ (LastCons LastOne) impossible
-isNotLastOne _ (LastCons (LastCons _)) impossible
+notLastOne : (contra : (x = value) -> Void) -> Last [x] value -> Void
+notLastOne contra LastOne = contra Refl
+notLastOne _ (LastCons LastOne) impossible
+notLastOne _ (LastCons (LastCons _)) impossible
 
-isNotLastCons : (contra : Last (x :: xs) value -> Void) -> Last (y :: (x :: xs)) value -> Void
-isNotLastCons contra (LastCons LastOne) = contra LastOne
-isNotLastCons contra (LastCons (LastCons prf)) = contra (LastCons prf)
+notLastCons : (contra : Last (x :: xs) value -> Void) -> Last (y :: (x :: xs)) value -> Void
+notLastCons contra (LastCons LastOne) = contra LastOne
+notLastCons contra (LastCons (LastCons prf)) = contra (LastCons prf)
 
 isLast : DecEq a => (xs : List a) -> (value : a) -> Dec (Last xs value)
-isLast [] value = No isNotNil
+isLast [] value = No notLastNil
 isLast (x :: []) value = case decEq x value of
                            (Yes Refl)  => Yes LastOne
-                           (No contra) => No (isNotLastOne contra)
+                           (No contra) => No (notLastOne contra)
 isLast (y :: (x :: xs)) value = case isLast (x :: xs) value of
                                   (Yes prf)   => Yes (LastCons prf)
-                                  (No contra) => No (isNotLastCons contra)
+                                  (No contra) => No (notLastCons contra)
