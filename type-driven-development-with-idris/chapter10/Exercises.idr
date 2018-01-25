@@ -5,6 +5,8 @@ import Data.Vect.Views
 
 import Data.Nat.Views
 
+import DataStore
+
 --------------------------------------------------------------------------------
 -- Exercises 10.1
 --------------------------------------------------------------------------------
@@ -67,3 +69,50 @@ palindrome xs with (vList xs)
   palindrome (x :: (ys ++ [y])) | (VCons rec) = case x == y of
                                                   True => palindrome ys | rec
                                                   False => False
+
+--------------------------------------------------------------------------------
+-- Exercises 10.3
+--------------------------------------------------------------------------------
+
+getValues : DataStore (SString .+. val_schema) -> List (SchemaType val_schema)
+getValues x with (storeView x)
+  getValues _ | SNil = []
+  getValues (addToStore (key, val) store) | (SAdd rec) = val :: getValues store | rec
+  
+testStore : DataStore (SString .+. SInt)
+testStore = addToStore ("First", 1) $
+            addToStore ("Second", 2) $
+            empty
+            
+export
+data Shape = Triangle Double Double
+           | Rectangle Double Double
+           | Circle Double
+
+export
+triangle : Double -> Double -> Shape
+triangle = Triangle
+
+export
+rectangle : Double -> Double -> Shape
+rectangle = Rectangle
+
+export
+circle : Double -> Shape
+circle = Circle
+
+data ShapeView : Shape -> Type where
+  STriangle : ShapeView (triangle base height)
+  SRectangle : ShapeView (rectangle width height)
+  SCircle : ShapeView (circle radius)
+  
+shapeView : (s : Shape) -> ShapeView s
+shapeView (Triangle x y) = STriangle
+shapeView (Rectangle x y) = SRectangle
+shapeView (Circle x) = SCircle
+
+area : Shape -> Double
+area s with (shapeView s)
+  area (triangle base height) | STriangle = 0.5 * (area $ rectangle base height) | SRectangle
+  area (rectangle width height) | SRectangle = width * height
+  area (circle radius) | SCircle = radius * radius * pi
