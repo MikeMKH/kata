@@ -40,3 +40,20 @@ total
 coinFlips : (count : Nat) -> Stream Int -> Vect count Face
 coinFlips Z xs = []
 coinFlips (S k) (value :: xs) = getFace value :: coinFlips k xs
+
+total
+square_root_approx : (number : Double) -> (approx : Double) -> Stream Double
+square_root_approx number approx = approx :: Delay (square_root_approx number next)  where
+  next = (approx + (number / approx)) / 2
+
+total
+square_root_bound : (max : Nat) -> (number : Double) -> (bound : Double) -> (approxs : Stream Double) -> Double
+square_root_bound Z number bound (value :: xs) = value
+square_root_bound (S k) number bound (x :: xs) =
+  if (abs (x * x - number) < bound)
+    then x
+    else square_root_bound k number bound xs
+
+total
+square_root : (number : Double) -> Double
+square_root number = square_root_bound 100 number 0.00000000001 $ square_root_approx number number
