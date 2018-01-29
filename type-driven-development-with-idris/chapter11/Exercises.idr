@@ -1,7 +1,12 @@
 import Data.Vect
 import Data.Primitives.Views
 
-total
+%default total
+
+--------------------------------------------------------------------------------
+-- Exercises 11.1
+--------------------------------------------------------------------------------
+
 every_other : Stream a -> Stream a
 every_other (_ :: x :: xs) = x :: every_other xs
 
@@ -10,11 +15,9 @@ data InfList : Type -> Type where
   
 %name InfList xs, ys, zs
 
-total
 countFrom : Integer -> InfList Integer
 countFrom x = x :: Delay (countFrom $ x + 1)
 
-total
 getPrefix : (n : Nat) -> InfList a -> Vect n a
 getPrefix Z xs = []
 getPrefix (S k) (value :: xs) = value :: getPrefix k xs
@@ -28,7 +31,6 @@ randoms seed = let seed' = 1664525 * seed + 1013904223 in
 
 data Face = Head | Tail
 
-total
 getFace : Int -> Face
 getFace x with (divides x 2)
   getFace ((2 * div) + rem) | (DivBy prf) = 
@@ -36,17 +38,14 @@ getFace x with (divides x 2)
       0 => Head
       _ => Tail
 
-total
 coinFlips : (count : Nat) -> Stream Int -> Vect count Face
 coinFlips Z xs = []
 coinFlips (S k) (value :: xs) = getFace value :: coinFlips k xs
 
-total
 square_root_approx : (number : Double) -> (approx : Double) -> Stream Double
 square_root_approx number approx = approx :: Delay (square_root_approx number next)  where
   next = (approx + (number / approx)) / 2
 
-total
 square_root_bound : (max : Nat) -> (number : Double) -> (bound : Double) -> (approxs : Stream Double) -> Double
 square_root_bound Z number bound (value :: xs) = value
 square_root_bound (S k) number bound (x :: xs) =
@@ -54,6 +53,34 @@ square_root_bound (S k) number bound (x :: xs) =
     then x
     else square_root_bound k number bound xs
 
-total
 square_root : (number : Double) -> Double
 square_root number = square_root_bound 100 number 0.00000000001 $ square_root_approx number number
+
+--------------------------------------------------------------------------------
+-- Exercises 11.2
+--------------------------------------------------------------------------------
+
+data InfIO : Type where
+  Do : IO a -> (a -> Inf InfIO) -> InfIO
+  
+(>>=) : IO a -> (a -> Inf InfIO) -> InfIO
+(>>=) = Do
+
+data Fuel = Dry | More (Lazy Fuel)
+
+run : Fuel -> InfIO -> IO ()
+run Dry _ = putStrLn "Done"
+run (More x) (Do y f) = do res <- y
+                           run x (f res)
+                           
+partial
+forever : Fuel
+forever = More forever
+
+totalRepl : (prompt : String) -> (action: String -> String) -> InfIO
+totalRepl prompt action =
+  do putStr prompt
+     s <- getLine
+     putStrLn $ action s
+     totalRepl prompt action
+     
