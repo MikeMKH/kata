@@ -1,6 +1,8 @@
 import Data.Vect
 import Data.Primitives.Views
 
+import System
+
 %default total
 
 --------------------------------------------------------------------------------
@@ -83,4 +85,3 @@ totalRepl prompt action =
      s <- getLine
      putStrLn $ action s
      totalRepl prompt action
-     
