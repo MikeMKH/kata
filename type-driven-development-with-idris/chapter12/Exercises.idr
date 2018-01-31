@@ -20,7 +20,7 @@ testTree = Node (Node (Node Empty "Jim" Empty)
                       (Node Empty "Eve" Empty))
 
 countEmpty : Tree a -> State Nat ()
-countEmpty Empty = update (+1)
+countEmpty Empty = increase 1
 countEmpty (Node left _ right) = do countEmpty left
                                     countEmpty right
                                         
