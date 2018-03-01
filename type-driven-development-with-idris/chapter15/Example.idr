@@ -62,3 +62,20 @@ run (Action act) = act
 run (Pure val) = pure val
 run (act >>= next) = do x <- run act
                         run $ next x
+                        
+procAdder : Process ()
+procAdder = do Response (\msg => case msg of
+                                 Add x y => Pure $ x + y)
+               procAdder
+
+-- :exec run $ procMain 42 3
+procMain : Nat -> Nat -> Process ()
+procMain x y = do Just add <- Spawn procAdder
+                    | Nothing => Action (putStrLn "Spawn failed")
+                  Just res <- Request add $ Add x y
+                    | Nothing => Action (putStrLn "Request failed")
+                  Action $ printLn res
+                  
+-- :exec run procMain'
+procMain' : Process ()
+procMain' = procMain 2 3
