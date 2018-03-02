@@ -1,4 +1,5 @@
 import System.Concurrency.Channels
+import ProcessLib
 
 --------------------------------------------------------------------------------
 -- Examples 15.1
@@ -26,7 +27,7 @@ main = do Just pid <- spawn adder
           printLn res
 
 --------------------------------------------------------------------------------
--- Examples 15.2.1
+-- Examples 15.2.1-2
 --------------------------------------------------------------------------------
 
 data MessagePID = MkMessage PID
@@ -79,3 +80,30 @@ procMain x y = do Just add <- Spawn procAdder
 -- :exec run procMain'
 procMain' : Process ()
 procMain' = procMain 2 3
+
+--------------------------------------------------------------------------------
+-- Examples 15.2.6
+--------------------------------------------------------------------------------
+
+data ListAction : Type where
+  Length : List elem -> ListAction
+  Append : List elem -> List elem -> ListAction
+  
+ListType : ListAction -> Type
+ListType (Length xs) = Nat
+ListType (Append {elem} xs ys) = List elem
+
+procList : Service ListType ()
+procList = do Respond (\msg => (case msg of
+                                     (Length xs) => Pure $ length xs
+                                     (Append xs ys) => Pure $ xs ++ ys))
+              Loop procList
+
+-- :exec runProc procListMain
+procListMain : Client ()
+procListMain = do Just list <- Spawn procList
+                    | Nothing => Action (putStrLn "Spawn failed")
+                  len <- Request list $ Length [1, 2, 3]
+                  Action $ printLn len
+                  app <- Request list $ Append [1, 2, 3] [4, 5, 6]
+                  Action $ printLn app
