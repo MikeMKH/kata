@@ -107,3 +107,52 @@ procListMain = do Just list <- Spawn procList
                   Action $ printLn len
                   app <- Request list $ Append [1, 2, 3] [4, 5, 6]
                   Action $ printLn app
+
+--------------------------------------------------------------------------------
+-- Examples 15.2.7
+--------------------------------------------------------------------------------
+
+record WCData where
+  constructor MkWCData
+  wordCount : Nat
+  lineCount : Nat
+  
+doCount : (content : String) -> WCData
+doCount content = let lcount = length $ lines content
+                      wcount = length $ words content in
+                      MkWCData wcount lcount
+                      
+data WC = CountFile String
+        | GetData String
+        
+WCType : WC -> Type
+WCType (CountFile x) = ()
+WCType (GetData x) = Maybe WCData
+
+countFile : (files : List (String, WCData)) -> (fname : String) -> Process WCType (List (String, WCData)) Sent Sent
+countFile files fname = do Right content <- Action $ readFile fname
+                             | Left err => Pure files
+                           let count = doCount content
+                           Action $ putStrLn $ "Counting done for "++ show fname
+                           Pure ((fname, doCount content) :: files)
+
+wcService : (loaded : List (String, WCData)) -> Service WCType ()
+wcService loaded = do msg <- Respond (\msg => case msg of
+                                              CountFile fname => Pure ()
+                                              GetData fname => Pure $ lookup fname loaded)
+                      newLoaded <- case msg of
+                                        Just (CountFile fname) => countFile loaded fname
+                                        _ => Pure loaded
+                      Loop $ wcService newLoaded
+
+-- :exec runProc $ procWC "Example.idr"
+procWC : String -> Client ()
+procWC fname = do Just wc <- Spawn (wcService [])
+                    | Nothing => Action (putStrLn "Spawn failed")
+                  Action $ putStrLn "Counting file"
+                  Request wc $ CountFile fname
+                  Action $ putStrLn "Processing"
+                  Just counts <- Request wc $ GetData fname
+                    | Nothing => Action (putStrLn "Problem reading file")
+                  Action $ putStrLn $ "words = " ++ show (wordCount counts)
+                  Action $ putStrLn $ "lines = " ++ show (lineCount counts)
