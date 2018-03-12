@@ -44,7 +44,9 @@ constant vec_add :
 constant vec_reserve :
   Π (α : Type) (n : ℕ), vec α n → vec α n
 
--- need to check
+variables v1 v2: vec ℕ 3
+#check vec_add ℕ 3 v1 v2
+#check vec_reserve ℕ 3 v1
 
 -- 4  
 constant matrix : Type u → ℕ → ℕ → Type u
@@ -57,4 +59,7 @@ constant matrix_mul :
   Π (α : Type) (n : ℕ) (m : ℕ) (p : ℕ),
     matrix α n m → matrix α m p → matrix α n p
     
--- need to check 
+variables m1 m2 : matrix ℕ 2 3
+variable m3 : matrix ℕ 3 4
+#check matrix_add ℕ 2 3 m1 m2
+#check matrix_mul ℕ 2 3 4 m1 m3
