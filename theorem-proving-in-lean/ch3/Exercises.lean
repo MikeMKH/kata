@@ -33,7 +33,18 @@ example : (p ∧ q) ∧ r ↔ p ∧ (q ∧ r) :=
      have hqr : q ∧ r, from and.right h,
      show (p ∧ q) ∧ r,
        from and.intro (and.intro hp (and.left hqr)) (and.right hqr))
--- example : (p ∨ q) ∨ r ↔ p ∨ (q ∨ r) := sorry
+example : (p ∨ q) ∨ r ↔ p ∨ (q ∨ r) :=
+  iff.intro
+    (assume h : (p ∨ q) ∨ r,
+     or.elim h
+       (assume hpq, or.elim hpq or.inl (assume hq, or.intro_right p (or.intro_left r hq)))
+       (assume hr, or.intro_right p (or.intro_right q hr))
+    )
+    (assume h : p ∨ (q ∨ r),
+     or.elim h
+       (assume hp, or.inl (or.intro_left q hp))
+       (assume hqr, or.elim hqr (assume hq, or.intro_left r (or.intro_right p hq)) or.inr)
+    )
 
 -- -- distributivity
 -- example : p ∧ (q ∨ r) ↔ (p ∧ q) ∨ (p ∧ r) := sorry
