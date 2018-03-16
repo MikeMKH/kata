@@ -1,3 +1,5 @@
+-- https://leanprover.github.io/theorem_proving_in_lean/quantifiers_and_equality.html#exercises
+
 variables (α : Type) (p q : α → Prop)
 
 -- 1
