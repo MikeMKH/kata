@@ -54,3 +54,53 @@ example : (∀ x, r → p x) ↔ (r → ∀ x, p x) :=
     assume hr : r → ∀ x, p x,
     take x : α, assume r, hr r x,
   iff.intro h₁ h₂
+  
+-- 3
+
+section barber
+  variables (men : Type) (barber : men)
+  variable  (shaves : men → men → Prop)
+  
+  example (h : ∀ x : men, shaves barber x ↔ ¬ shaves x x) : false :=
+    have h' : shaves barber barber ↔ ¬shaves barber barber,
+      from h barber,
+    have barber_does_not_shaves_self : ¬shaves barber barber,
+      from assume barber_shaves_self : shaves barber barber,
+      iff.elim_left h' barber_shaves_self barber_shaves_self,
+    barber_does_not_shaves_self (iff.elim_right h' barber_does_not_shaves_self)
+end barber
+
+-- 4
+
+namespace hide
+
+  def divides (m n : ℕ) : Prop := ∃ k, m * k = n
+  
+  instance : has_dvd nat := ⟨divides⟩
+  
+  def even (n : ℕ) : Prop := 2 ∣ n
+  
+  section
+    variables m n : ℕ
+  
+    #check m ∣ n
+    #check m^n
+    #check even (m^n +3)
+  end
+  
+end hide
+
+def prime (n : ℕ) : Prop :=
+  n ≥ 2 ∧ ∀ x, x ∣ n → x = 1 ∨ x = n
+
+def infinitely_many_primes : Prop := sorry
+
+def Fermat_prime (n : ℕ) : Prop := sorry
+
+def infinitely_many_Fermat_primes : Prop := sorry
+
+def goldbach_conjecture : Prop := sorry
+
+def Goldbach's_weak_conjecture : Prop := sorry
+
+def Fermat's_last_theorem : Prop := sorry
