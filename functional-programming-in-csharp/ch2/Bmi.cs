@@ -1,6 +1,9 @@
 using System;
 using Xunit;
+using static System.Console;
 
+// dotnet build; dotnet run ch2.dll
+// dotnet watch test
 namespace ch2
 {
     public class BmiTests
@@ -62,6 +65,19 @@ namespace ch2
       var range = Results(Calculate(height, weight));
       
       writter(range);
+    }
+    
+    public static void Main(string[] args)
+    {
+      Func<string, double> reader = s =>
+      {
+        Write($"{s}=");
+        return double.Parse(ReadLine());  
+      };
+      
+      Action<Range> writter = r => WriteLine($"You are {r}");
+      
+      Run(reader, writter);
     }
   }
 }
