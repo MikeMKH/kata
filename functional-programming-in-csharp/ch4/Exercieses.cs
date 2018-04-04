@@ -51,7 +51,9 @@ namespace ch4
                 {"Some", new Employee(){Id = "3", WorkPermit = Some(new WorkPermit(){Number = "2", Expiry = DateTime.Now.AddDays(100)})}},
             };
             
-            Assert.Equal("1", GetWorkPermit(employees, "Expiried").Bind(x => x.Number));
+            Assert.True(
+                GetWorkPermit(employees, "Expiried")
+                  .Match(Some: _ => false, None: () => true));
             Assert.Equal("2", GetWorkPermit(employees, "Some").Bind(x => x.Number));
             Assert.True(
                 GetWorkPermit(employees, "None")
@@ -59,7 +61,11 @@ namespace ch4
         }
         
         static Option<WorkPermit> GetWorkPermit(Dictionary<string, Employee> employees, string employeeId)
-          =>  employees.Lookup(employeeId).Bind(x => x.WorkPermit);
+          =>  employees.Lookup(employeeId)
+                .Bind(x => x.WorkPermit)
+                .Where(HasExpiried.Negate());
+                
+        static Func<WorkPermit, bool> HasExpiried = permit => permit.Expiry < DateTime.Now; 
     }
     
     static public class MapExt
