@@ -25,6 +25,22 @@ namespace ch6
             Option<string> some = Some("some");
             Assert.Equal(Right("some"), some.ToEither());
         }
+        
+        [Fact]
+        public void Ex2()
+        {
+            Assert.Equal(Some(200), flow("200"));
+            
+            // Option<int> flow(string value)
+            //   => Some(value)
+            //        .Bind(x => Int.Parse(x))
+            //        .Bind(x => x >= 150 ? Some(x) : None);
+            
+            Option<int> flow(string value)
+              => Some(value)
+                   .Bind(x => Int.Parse(x).ToEither())
+                   .Bind(x => x >= 150 ? Some(x) : None);
+        }
     }
     
     public static class Ext
@@ -38,5 +54,11 @@ namespace ch6
           => option.Match<Either<T, T>>(
               () => Left(left),
               x => Right(x));
+              
+        public static Option<R> Bind<L, T, R>(this Option<T> option, Func<T, Either<L, R>> f)
+          => option.Match(
+              () => None,
+              x => f(x).ToOption()
+          );
     }
 }
