@@ -41,6 +41,63 @@ namespace ch6
                    .Bind(x => Int.Parse(x).ToEither())
                    .Bind(x => x >= 150 ? Some(x) : None);
         }
+        
+        [Fact]
+        public void Ex3()
+        {
+            Func<string> works = () => "works!";
+            Assert.Equal("works!", tryRun(works));
+            
+            Func<int> fails = () => Int16.Parse("fails :(");
+            tryRun(fails)
+              .Match(
+                  Exception: e => Assert.Equal(e.Message, "Input string was not in a correct format."),
+                  Success: _ => Assert.True(false));
+            
+            Exceptional<T> tryRun<T>(Func<T> f)
+            {
+                try
+                {
+                    return f();
+                }
+                catch(Exception e)
+                {
+                    return e;
+                }
+            }
+        }
+        
+        [Fact]
+        public void Ex4()
+        {
+            Func<Exception, string> safe = _ => "sorry";
+            
+            Func<string> works = () => "works!";
+            safely(works, safe)
+              .Match(
+                  Left: _ => Assert.True(false),
+                  Right: s => Assert.Equal("works!", s)
+              );
+            
+            Func<int> fails = () => Int16.Parse("fails!!!");
+            safely(fails, safe)
+              .Match(
+                  Left: s => Assert.Equal("sorry", s),
+                  Right: _ => Assert.True(false)
+              );
+            
+             Either<L, R> safely<L, R>(Func<R> f, Func<Exception, L> left)
+             {
+                 try
+                 {
+                     return f();
+                 }
+                 catch(Exception e)
+                 {
+                     return left(e);
+                 }
+             }
+        }
     }
     
     public static class Ext
