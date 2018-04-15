@@ -48,6 +48,28 @@ namespace ch7
             Assert.Equal(PhoneType.Mobile, CreateUkMobilePhoneNumber("somthing").PhoneType);
             Assert.Equal("uk", CreateUkMobilePhoneNumber("somthing").CountryCode);
         }
+        
+        [Fact]
+        public void Ex3()
+        {
+          string spy = "";
+          Action<string> AssertLogContains = s => Assert.Contains(s, spy);
+          
+          var sut = Logger.Create(s => spy = s);
+          
+          sut.Info("hello");
+          AssertLogContains("Info");
+          AssertLogContains("hello");
+          
+          sut.Debug("hello");
+          AssertLogContains("Debug");
+          
+          sut.Warn("hello");
+          AssertLogContains("Warn");
+          
+          sut.Error("hello");
+          AssertLogContains("Error");
+        }
     }
     
     public static class BinFuncExt
@@ -87,4 +109,27 @@ namespace ch7
             Number = number;
         }
     }
+    
+    public static class Logger
+    {
+      public enum Level { Info, Debug, Warn, Error };
+           
+      public static Action<Level, string> Create(Action<string> target)
+        => (level, message) => target($"[{level}]: {message}");
+
+      public static void Log(this Action<Level, string> log, Level level, string message)
+        => log(level, message);
+        
+      public static void Info(this Action<Level, string> log, string message)
+        => log(Level.Info, message);
+        
+      public static void Debug(this Action<Level, string> log, string message)
+        => log(Level.Debug, message);
+        
+      public static void Warn(this Action<Level, string> log, string message)
+        => log(Level.Warn, message);
+        
+      public static void Error(this Action<Level, string> log, string message)
+        => log(Level.Error, message);
+  }
 }
