@@ -33,6 +33,32 @@ namespace ch9
                  .RemovalAt(at)
                  .AsEnumerable().ElementAt(at)
           );
+          
+        [Theory]
+        [InlineData(1)]
+        [InlineData(0)]
+        [InlineData(99)]
+        [InlineData(42)]
+        public void Ex1_TakeWhile(int at)
+          => Assert.Equal(
+               at
+              ,Cons.LinkedList.List(Enumerable.Range(0, 100 + 1).ToArray())
+                 .TakeWhile(x => x <= at)
+                 .AsEnumerable().ElementAt(at)
+          );
+          
+        [Theory]
+        [InlineData(1)]
+        [InlineData(0)]
+        [InlineData(99)]
+        [InlineData(42)]
+        public void Ex1_DropWhile(int at)
+          => Assert.Equal(
+               at
+              ,Cons.LinkedList.List(Enumerable.Range(0, 100 + 1).ToArray())
+                 .DropWhile(x => x < at)
+                 .AsEnumerable().First()
+          );
     }
     
     public static class Ext
@@ -46,6 +72,16 @@ namespace ch9
           => index == 0
              ? source.Tail
              : Cons.LinkedList.List(source.Head, source.Tail.RemovalAt(index - 1));
+             
+        public static Cons.List<T> TakeWhile<T>(this Cons.List<T> source, Predicate<T> predicate)
+          => predicate(source.Head)
+             ? Cons.LinkedList.List(source.Head, source.Tail.TakeWhile(predicate))
+             : Cons.LinkedList.List<T>();
+             
+        public static Cons.List<T> DropWhile<T>(this Cons.List<T> source, Predicate<T> predicate)
+          => predicate(source.Head)
+             ? source.Tail.DropWhile(predicate)
+             : source;
     }
 }
 
