@@ -43,6 +43,26 @@ namespace ch10
         [Property]      
         public void CreateMustAlwaysPassValueBack(int value)
           => Assert.Equal(FizzBuzzer.Create(value).Value, value);
+          
+        [Fact]
+        public void FizzMustReturnStringFizz()
+          => Assert.Equal(FizzBuzzer.Create(3).Convert(), "Fizz");
+          
+        [Fact]
+        public void BuzzMustReturnStringBuzz()
+          => Assert.Equal(FizzBuzzer.Create(5).Convert(), "Buzz");
+          
+        [Fact]
+        public void FizzBuzzMustReturnStringFizzBuzz()
+          => Assert.Equal(FizzBuzzer.Create(15).Convert(), "FizzBuzz");
+          
+        [Theory]
+        [InlineData(2)]
+        [InlineData(4)]
+        [InlineData(11)]
+        [InlineData(2 * 4 * 11)]
+        public void OtherMustReturnNumber(int value)
+          => Assert.Equal(FizzBuzzer.Create(value).Convert(), value.ToString());
     }
     
     public static class FizzBuzzer
@@ -59,6 +79,21 @@ namespace ch10
             if (!isFizz && !isBuzz) return (FizzBuzzerType.Other, value);
             
             return (FizzBuzzerType.Other, value);  // make the compiler happy
+        }
+        
+        public static string Convert(this (FizzBuzzerType Type, int Value) source)
+        {
+            switch(source.Type)
+            {
+              case FizzBuzzerType.Fizz:
+                return "Fizz";
+              case FizzBuzzerType.Buzz:
+                return "Buzz";
+              case FizzBuzzerType.FizzBuzz:
+                return "FizzBuzz";
+              default:
+                return source.Value.ToString();
+            }
         }
     }
 }
