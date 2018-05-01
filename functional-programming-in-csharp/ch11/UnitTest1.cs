@@ -71,5 +71,40 @@ namespace ch11
             Assert.NotEmpty(spy);
             Assert.Equal(new List<string> { "fallback" }, spy);
         }
+        
+        [Fact]
+        public void TryIsLazy()
+        {
+            var spy = new List<string>();
+            Assert.Empty(spy);
+            
+            Func<string> pass = () => { spy.Add("Success"); return "works"; };
+            Func<string> fail = () => { spy.Add("Fail"); throw new ApplicationException("nooooooo!"); };
+            
+            Assert.Empty(spy);
+            
+            var p = Try(pass);
+            var f = Try(fail);
+            
+            Assert.Empty(spy);
+            
+            string result;
+            result = p.Run()
+                      .Match(
+                          e => e.Message,
+                          s => s);
+                          
+            Assert.Equal(new List<string> { "Success" }, spy);
+            Assert.Equal("works", result);
+            
+            spy.Clear();
+            result = f.Run()
+                      .Match(
+                          e => e.Message,
+                          s => s);
+                          
+            Assert.Equal("Fail", spy.Head());
+            Assert.Equal("nooooooo!", result);
+        }
     }
 }
