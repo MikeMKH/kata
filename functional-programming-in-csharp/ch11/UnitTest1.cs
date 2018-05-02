@@ -3,6 +3,7 @@ using Xunit;
 using LaYumba.Functional;
 using static LaYumba.Functional.F;
 using System.Collections.Generic;
+using static ch11.MiddlewareExt;
 
 namespace ch11
 {
@@ -106,5 +107,35 @@ namespace ch11
             Assert.Equal("Fail", spy.Head());
             Assert.Equal("nooooooo!", result);
         }
+        
+        [Fact]
+        public void MiddlewareIsExecutedBefore()
+        {
+            List<string> spy = new List<string>();
+            Middleware<string> spied = s => { spy.Add("called"); return s; };
+            
+            var result = (
+                from t in spied
+                select t
+            )(s => s.ToUpper())("hi");
+            
+            Assert.Equal("HI", result);
+            Assert.Equal("called", spy.Head());
+        }
+    }
+    
+    public static class MiddlewareExt
+    {
+        public delegate dynamic Middleware<T>(Func<T, dynamic> cont);
+        public static Middleware<R> Bind<T, R>(this Middleware<T> middleware, Func<T, Middleware<R>> f)
+          => cont => middleware(t => f(t)(cont));
+        public static Middleware<R> SelectMany<T, R>(this Middleware<T> middleware, Func<T, Middleware<R>> f)
+          => middleware.Bind(f);
+        public static Middleware<R> Map<T, R>(this Middleware<T> middleware, Func<T, R> f)
+          => cont => middleware(t => cont(f(t)));
+        public static Middleware<R> Select<T, R>(this Middleware<T> middleware, Func<T, R> f)
+          => middleware.Map(f);
+        public static T Run<T>(this Middleware<T> middleware)
+          => (T) middleware(t => t);    
     }
 }
