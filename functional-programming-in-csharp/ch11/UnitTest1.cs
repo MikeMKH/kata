@@ -3,6 +3,7 @@ using Xunit;
 using LaYumba.Functional;
 using static LaYumba.Functional.F;
 using System.Collections.Generic;
+using Unit = System.ValueTuple;
 using static ch11.MiddlewareExt;
 
 namespace ch11
@@ -109,7 +110,7 @@ namespace ch11
         }
         
         [Fact]
-        public void MiddlewareIsExecutedBefore()
+        public void MiddlewareIsExecuted()
         {
             List<string> spy = new List<string>();
             Middleware<string> spied = s => { spy.Add("called"); return s; };
@@ -122,6 +123,51 @@ namespace ch11
             Assert.Equal("HI", result);
             Assert.Equal("called", spy.Head());
         }
+        
+        [Fact]
+        public void MiddlewareFormsPipeline()
+        {
+            List<string> store = new List<string>();
+            
+            Func<string, Middleware<string>> passed = s => cont => { store.Add(s); return cont("passed"); };
+            
+            var pipeline = 
+                from t in passed("called")
+                select t + "!";
+                
+            Assert.Equal("passed!", pipeline.Run());
+            Assert.Equal(new List<string> {"called"}, store);
+        }
+        
+        [Fact]
+        public void MiddlewareAreAllExecuted()
+        {
+            List<string> store = new List<string>();
+            
+            Middleware<Unit> frame = cont =>
+            {
+                store.Add("enter");
+                var result = cont(Unit());
+                store.Add("exit");
+                return result;
+            };
+            Func<string, Middleware<string>> passed = s => cont => { store.Add(s); return cont("passed"); };
+            
+            var pipeline = 
+                from _ in frame
+                from t in passed("called")
+                select t + "!";
+                
+            Assert.Equal("passed!", pipeline.Run());
+            Assert.Equal(
+                new List<string>
+                {
+                    "enter",
+                    "called",
+                    "exit"
+                },
+                store);
+        }
     }
     
     public static class MiddlewareExt
@@ -131,11 +177,13 @@ namespace ch11
           => cont => middleware(t => f(t)(cont));
         public static Middleware<R> SelectMany<T, R>(this Middleware<T> middleware, Func<T, Middleware<R>> f)
           => middleware.Bind(f);
+        public static Middleware<RR> SelectMany<T, R, RR>(this Middleware<T> middleware, Func<T, Middleware<R>> f, Func<T, R, RR> project)
+           => cont => middleware(t => f(t)(r => cont(project(t, r))));
         public static Middleware<R> Map<T, R>(this Middleware<T> middleware, Func<T, R> f)
           => cont => middleware(t => cont(f(t)));
         public static Middleware<R> Select<T, R>(this Middleware<T> middleware, Func<T, R> f)
           => middleware.Map(f);
         public static T Run<T>(this Middleware<T> middleware)
-          => (T) middleware(t => t);    
+          => middleware(t => t);    
     }
 }
