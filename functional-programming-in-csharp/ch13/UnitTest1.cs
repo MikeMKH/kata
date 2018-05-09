@@ -1,13 +1,13 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Collections.Generic;
+using System.Linq;
 using LaYumba.Functional;
 using static LaYumba.Functional.F;
 using Int = LaYumba.Functional.Int;
 using String = LaYumba.Functional.String;
 using Xunit;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace ch13
 {
@@ -85,20 +85,48 @@ namespace ch13
             Assert.Equal(applicative(given), monadic(given));
        }
        
-    //    [Fact]
-    //    public void ApplicativeTraversalIsAbleToGiveEachException()
-    //    {
-    //        var errors = "error 1,2,error 3"
-    //                       .Split(',')
-    //                       .Map(String.Trim)
-    //                       .TraverseA(Int.Parse)
-    //                       .Map(Enumerable.Sum)
-    //                       .Match(
-    //                           errs => string.Join(",", errs),
-    //                           sum => $"the sum is {sum}"
-    //                       );
+       [Fact]
+       public void ApplicativeTraversalIsAbleToHandleExceptions()
+       {
+           var errors = "error 1,2,error 3"
+                          .Split(',')
+                          .Map(String.Trim)
+                          .TraverseA(Int.Parse)
+                          .Map(Enumerable.Sum)
+                          .Match(
+                              () => "string contains non-int values",
+                              sum => $"sum is {sum}"
+                          );
                               
-    //         Assert.Equal("error 1,error 3", errors);
-    //    }
+            Assert.NotEqual("sum is 6", errors);
+            Assert.Equal("string contains non-int values", errors);
+       }
+       
+       [Fact]
+       public void ValidationApplicativeTraversalIsAbleToGetAllExceptions()
+       {
+           Func<string, Validation<int>> isInt =
+             s => Int.Parse(s)
+                     .Match(
+                         () => Error($"invalid number {s}"),
+                         x => Valid(x)
+                     );
+                     
+            Assert.Equal(Error("invalid number error"), isInt("error"));
+            Assert.Equal(Valid(7), isInt("7"));
+           
+           var errors = "error 1,2,error 3"
+                          .Split(',')
+                          .Map(String.Trim)
+                          .TraverseA(isInt)
+                          .Map(Enumerable.Sum)
+                          .Match(
+                              errs => string.Join(", ", errs),
+                              sum => $"sum is {sum}"
+                          );
+                              
+            Assert.NotEqual("sum is 6", errors);
+            Assert.Equal("invalid number error 1, invalid number error 3", errors);
+       }
     }
 }
