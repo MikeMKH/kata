@@ -8,6 +8,8 @@ using static LaYumba.Functional.F;
 using Int = LaYumba.Functional.Int;
 using String = LaYumba.Functional.String;
 using Xunit;
+using FsCheck.Xunit;
+using FsCheck;
 
 namespace ch13
 {
@@ -127,6 +129,25 @@ namespace ch13
                               
             Assert.NotEqual("sum is 6", errors);
             Assert.Equal("invalid number error 1, invalid number error 3", errors);
+       }
+       
+       [Property(Arbitrary = new [] { typeof(ArbitraryOption) })]
+       public void TraverseSwitchesMonadicStacking(Option<int>[] stack)
+       { 
+           // not sure how to get FsCheck to give me an IEnumerable
+           Assert.IsType(typeof(Option<int>[]), stack);
+           Assert.IsType(typeof(Option<IEnumerable<int>>), stack.Traverse(x => x));
+       }
+       
+       public static class ArbitraryOption
+       {
+           public static Arbitrary<Option<T>> Option<T>()
+             => (from isSome in Arb.Generate<bool>()
+                 from value in Arb.Generate<T>()
+                 select isSome && value != null
+                        ? Some(value)
+                        : None
+               ).ToArbitrary();
        }
     }
 }
