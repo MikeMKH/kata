@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks.Dataflow;
 using Xunit;
 
@@ -28,6 +29,27 @@ namespace ch15
             agent.Tell(43);
             
             Assert.Equal(new [] { 42, 8, 42, 43 }, processed);
+        }
+        
+        [Fact]
+        public void StatefulAgentCanBeUsedAsCounter()
+        {   
+            List<int> spy = new List<int>();
+            var counter = new StatefulAgent<int, int>(
+                0,
+                (state, increment) => {
+                    spy.Add(state + increment);
+                    return state + increment;
+                }
+            );
+            
+            Assert.Empty(spy);
+            var expected = Enumerable.Range(1, 100).ToList();
+            
+            expected
+              .ForEach(_ => counter.Tell(1));
+              
+            Assert.Equal(expected, spy);
         }
     }
     
