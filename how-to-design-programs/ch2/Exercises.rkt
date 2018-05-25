@@ -43,3 +43,33 @@
 (==> #true #false)
 
 (string-insert "helloworld" 6)
+
+(define BASE-ATTENDACE 120)
+(define BASE-TICKET-PRICE 5.0)
+(define AVG-ATTENDACE-CHG (/ 15 0.1))
+(define BASE-PERFORMANCE-COST 180)
+;(define AVG-COST-PER-ATTENDEE 0.04)
+(define AVG-COST-PER-ATTENDEE 1.5)
+
+(define (attendees ticket-price)
+  (- BASE-ATTENDACE (* (- ticket-price BASE-TICKET-PRICE) AVG-ATTENDACE-CHG)))
+
+(define (revenue ticket-price)
+  (* ticket-price (attendees ticket-price)))
+
+(define (cost ticket-price)
+;  (+ BASE-PERFORMANCE-COST (* AVG-COST-PER-ATTENDEE (attendees ticket-price))))
+  (* AVG-COST-PER-ATTENDEE (attendees ticket-price)))
+
+(define (profit ticket-price)
+  (- (revenue ticket-price)
+     (cost ticket-price)))
+
+; not sure how to do map with BSL
+(profit 1)
+(profit 2)
+(profit 3)
+(profit 4)
+(profit 5)
+
+; skipped 31 and 32 ;)
