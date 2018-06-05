@@ -60,6 +60,13 @@
 
 ; skipped 56 and 57
 
+(check-expect (sales-tax 0) 0)
+(check-expect (sales-tax 999) 0)
+(check-expect (sales-tax 1000) (* 0.05 1000))
+(check-expect (sales-tax 9999) (* 0.05 9999))
+(check-expect (sales-tax 10000) (* 0.08 10000))
+(check-expect (sales-tax 10001) (* 0.08 10001))
+
 (define (sales-tax p)
   (cond
     [(and (<= 0 p)
@@ -68,11 +75,51 @@
           (< p 10000)) (* 0.05 p)]
     [(>= p 10000) (* 0.08 p)]))
 
-(check-expect (sales-tax 0) 0)
-(check-expect (sales-tax 999) 0)
-(check-expect (sales-tax 1000) (* 0.05 1000))
-(check-expect (sales-tax 9999) (* 0.05 9999))
-(check-expect (sales-tax 10000) (* 0.08 10000))
-(check-expect (sales-tax 10001) (* 0.08 10001))
-
 ; I am not sure if BSL supports lambda :(
+
+(check-expect (tl-next "red") "green")
+(check-expect (tl-next "green") "yellow")
+(check-expect (tl-next "yellow") "red")
+(check-expect (tl-next (tl-next (tl-next "red"))) "red")
+
+(define (tl-next cs)
+  (cond
+    [(string=? "red" cs) "green"]
+    [(string=? "green" cs) "yellow"]
+    [(string=? "yellow" cs) "red"]))
+
+; 60, no since 0-2 have no meaning in the problem domain
+
+; 61, tl-symbolic since modulo is not part of the problem domain
+
+(define LOCKED "locked")
+(define CLOSED "closed")
+(define OPEN   "open")
+
+(check-expect (door-closer LOCKED) LOCKED)
+(check-expect (door-closer CLOSED) CLOSED)
+(check-expect (door-closer OPEN)   CLOSED)
+
+(define (door-closer ds)
+  (cond
+    [(string=? OPEN ds) CLOSED]
+    [else ds]))
+
+(define UNLOCK "u")
+(define LOCK   "l")
+(define PUSH   " ")
+
+(check-expect (door-action LOCKED UNLOCK) CLOSED)
+(check-expect (door-action CLOSED LOCK)   LOCKED)
+(check-expect (door-action CLOSED PUSH)   OPEN)
+(check-expect (door-action OPEN   UNLOCK) OPEN)
+
+(define (door-action ds act)
+  (cond
+    [(and (string=? LOCKED ds)
+          (string=? UNLOCK act)) CLOSED]
+    [(and (string=? CLOSED ds)
+          (string=? LOCK act)) LOCKED]
+    [(and (string=? CLOSED ds)
+          (string=? PUSH act)) OPEN]
+    [(string=? OPEN ds) OPEN]))
