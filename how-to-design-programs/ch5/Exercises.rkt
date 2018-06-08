@@ -36,3 +36,33 @@
 (check-expect (ballf-deltax (make-ballf 30 40 -10 5)) -10)
 
 (define-struct ballf [x y deltax deltay])
+
+; skipped 69
+
+
+(define-struct centry [name home office cell])
+(define-struct phone [area number])
+
+(define m
+  (make-centry
+  "Mike"
+  (make-phone "111" "111-1111")
+  (make-phone "222" "222-2222")
+  (make-phone "333" "333-3333")))
+
+(check-expect (phone-area (centry-home m)) "111")
+(check-expect (phone-area (centry-office m)) "222")
+
+(define HEIGHT 200)
+(define MIDDLE (quotient HEIGHT 2))
+(define WIDTH  400)
+(define CENTER (quotient WIDTH 2))
+ 
+(define-struct game [left-player right-player ball])
+ 
+(define game0
+  (make-game MIDDLE MIDDLE (make-posn CENTER CENTER)))
+
+(check-expect (game-ball game0) (make-posn CENTER CENTER))
+(check-expect (posn? (game-ball game0)) #true)
+(check-expect (game-left-player game0) MIDDLE)
