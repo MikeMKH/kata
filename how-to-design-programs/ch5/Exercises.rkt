@@ -66,3 +66,54 @@
 (check-expect (game-ball game0) (make-posn CENTER CENTER))
 (check-expect (posn? (game-ball game0)) #true)
 (check-expect (game-left-player game0) MIDDLE)
+
+(define-struct phone# [area switch number])
+
+(check-expect (phone#-area (make-phone# "111" "222" "3333")) "111")
+(check-expect (phone#-switch (make-phone# "111" "222" "3333")) "222")
+(check-expect (phone#-number (make-phone# "111" "222" "3333")) "3333")
+(check-expect (phone#-number (make-phone# "I" "am" "coder")) "coder")
+
+(check-expect (posn-update-x (make-posn 1 10) 20) (make-posn 20 10))
+
+(define (posn-update-x p x)
+  (make-posn x (posn-y p)))
+
+; skipped 74
+
+(check-expect (posn+ (make-posn 1 1) (make-posn 10 10)) (make-posn 11 11))
+(check-expect (posn+ (make-posn 1 0) (make-posn 1 0)) (make-posn 2 0))
+(check-expect (posn+ (make-posn 0 1) (make-posn 0 1)) (make-posn 0 2))
+(check-expect (posn+ (make-posn 1 0) (make-posn 0 1)) (make-posn 1 1))
+(check-expect (posn+ (make-posn 0 1) (make-posn 1 0)) (make-posn 1 1))
+
+(define (posn+ p1 p2)
+  (make-posn
+   (+ (posn-x p1) (posn-x p2))
+   (+ (posn-y p1) (posn-y p2))))
+
+(define-struct vel [deltax deltay])
+
+(check-expect (vposn+ (make-posn 1 2) (make-vel 10 20)) (make-posn 11 22))
+
+(define (vposn+ p v)
+  (make-posn
+   (+ (posn-x p) (vel-deltax v))
+   (+ (posn-y p) (vel-deltay v))))
+
+; skipped 76
+
+;(define-struct pt-time [Number[0-23] Number[0-59] Number[0-59]])
+(define-struct pt-time [hours minutes seconds])
+
+(check-expect (pt-time-hours (make-pt-time 21 34 56)) 21)
+(check-expect (pt-time-minutes (make-pt-time 21 34 56)) 34)
+(check-expect (pt-time-seconds (make-pt-time 21 34 56)) 56)
+
+(define-struct word3 [letter1 letter2 letter3])
+
+(check-expect (word3-letter1 (make-word3 "a" #false "e")) "a")
+(check-expect (word3-letter2 (make-word3 "a" #false "e")) #false)
+(check-expect (word3-letter3 (make-word3 "a" #false "e")) "e")
+
+; skipped 79
