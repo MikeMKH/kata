@@ -116,4 +116,49 @@
 (check-expect (word3-letter2 (make-word3 "a" #false "e")) #false)
 (check-expect (word3-letter3 (make-word3 "a" #false "e")) "e")
 
-; skipped 79
+; skipped 79 and 80
+
+(check-expect (time->seconds (make-pt-time 0 0 42)) 42)
+(check-expect (time->seconds (make-pt-time 0 42 0)) (* 42 60))
+(check-expect (time->seconds (make-pt-time 42 0 0)) (* 42 60 60))
+(check-expect (time->seconds (make-pt-time 1 1 1)) (+ 1 60 3600))
+(check-expect (time->seconds (make-pt-time 12 30 2)) 45002)
+
+(define (time->seconds t)
+  (+
+   (* (pt-time-hours t) 60 60)
+   (* (pt-time-minutes t) 60)
+   (pt-time-seconds t)))
+
+(check-expect (compare-word
+               (make-word3 "a" "b" "c")
+               (make-word3 "a" "b" "c"))
+              (make-word3 "a" "b" "c"))
+(check-expect (compare-word
+               (make-word3 "x" "b" "c")
+               (make-word3 "a" "b" "c"))
+              (make-word3 #false "b" "c"))
+(check-expect (compare-word
+               (make-word3 "a" "b" "c")
+               (make-word3 "a" "x" "c"))
+              (make-word3 "a" #false "c"))
+(check-expect (compare-word
+               (make-word3 "a" "b" "x")
+               (make-word3 "a" "b" "c"))
+              (make-word3 "a" "b" #false))
+(check-expect (compare-word
+               (make-word3 "a" "b" "c")
+               (make-word3 "x" "b" "x"))
+              (make-word3 #false "b" #false))
+(check-expect (compare-word
+               (make-word3 "a" "x" "x")
+               (make-word3 "x" "b" "c"))
+              (make-word3 #false #false #false))
+
+(define (compare-word w1 w2)
+  (make-word3
+   (if (string=? (word3-letter1 w1) (word3-letter1 w2)) (word3-letter1 w1) #false)
+   (if (string=? (word3-letter2 w1) (word3-letter2 w2)) (word3-letter2 w1) #false)
+   (if (string=? (word3-letter3 w1) (word3-letter3 w2)) (word3-letter3 w1) #false)))
+
+; skipped 83 - 87
