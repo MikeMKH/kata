@@ -39,7 +39,6 @@
 
 ; skipped 69
 
-
 (define-struct centry [name home office cell])
 (define-struct phone [area number])
 
@@ -103,7 +102,7 @@
 
 ; skipped 76
 
-;(define-struct pt-time [Number[0-23] Number[0-59] Number[0-59]])
+;(make-pt-time Number[0-23] Number[0-59] Number[0-59])
 (define-struct pt-time [hours minutes seconds])
 
 (check-expect (pt-time-hours (make-pt-time 21 34 56)) 21)
@@ -162,3 +161,14 @@
    (if (string=? (word3-letter3 w1) (word3-letter3 w2)) (word3-letter3 w1) #false)))
 
 ; skipped 83 - 87
+
+(define-struct vcat [x direction happiness])
+
+(define RIGHT "right")
+(define LEFT  "left")
+
+(check-expect (vcat-x (make-vcat 1 RIGHT 100)) 1)
+(check-expect (vcat-direction (make-vcat 1 LEFT 100)) LEFT)
+(check-expect (vcat-happiness (make-vcat 1 RIGHT 100)) 100)
+
+; skipped 89-90, 92-93
