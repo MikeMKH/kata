@@ -38,4 +38,39 @@
 (define (vehicle-fits? vehicle people)
   (>= (vehicle-passengers vehicle) people))
 
-; todo 105
+(define-struct coordinate [upper lower])
+
+(check-expect (posn-x (coordinate-upper (make-coordinate (make-posn 10 0) (make-posn 20 0)))) 10)
+(check-expect (posn-y (coordinate-upper (make-coordinate (make-posn 0 10) (make-posn 0 20)))) 10)
+(check-expect (posn-x (coordinate-lower (make-coordinate (make-posn 10 0) (make-posn 20 0)))) 20)
+(check-expect (posn-y (coordinate-lower (make-coordinate (make-posn 0 10) (make-posn 0 20)))) 20)
+
+; skipped 106 - 107
+
+(define-struct cross-state [person count])
+
+(check-expect (cross-state-person (make-cross-state "stop" 0)) "stop")
+(check-expect (cross-state-person (make-cross-state "go" 0)) "go")
+(check-expect (cross-state-person (make-cross-state "counter" 10)) "counter")
+(check-expect (cross-state-count (make-cross-state "counter" 10)) 10)
+
+(define (count-down state)
+  (cond
+    [(string=? (cross-state-person state) "counter") (switch-state state)]
+    [else state]))
+
+(define (switch-state state)
+  (cond
+    [(string=? (cross-state-person state) "stop") (make-cross-state "go" 0)]
+    [(string=? (cross-state-person state) "go") (make-cross-state "count" 10)]
+    [(and
+      (string=? (cross-state-person state) "counter")
+      (= (cross-state-count state) 0)) (make-cross-state "stop" 0)]
+    [(string=? (cross-state-person state) "counter") (cross-state-sub1 state)]))
+
+(define (cross-state-sub1 state)
+  (make-cross-state
+   "counter"
+   (sub1 (cross-state-count state))))
+
+; todo tests
