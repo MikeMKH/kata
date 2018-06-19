@@ -54,12 +54,12 @@
 (check-expect (cross-state-person (make-cross-state "counter" 10)) "counter")
 (check-expect (cross-state-count (make-cross-state "counter" 10)) 10)
 
-(define (count-down state)
-  (cond
-    [(string=? (cross-state-person state) "counter") (switch-state state)]
-    [else state]))
+(check-expect (next-state (make-cross-state "stop" 0)) (make-cross-state "go" 0))
+(check-expect (next-state (make-cross-state "go" 0)) (make-cross-state "count" 10))
+(check-expect (next-state (make-cross-state "counter" 0)) (make-cross-state "stop" 0))
+(check-expect (next-state (make-cross-state "counter" 10)) (make-cross-state "counter" 9))
 
-(define (switch-state state)
+(define (next-state state)
   (cond
     [(string=? (cross-state-person state) "stop") (make-cross-state "go" 0)]
     [(string=? (cross-state-person state) "go") (make-cross-state "count" 10)]
@@ -73,4 +73,46 @@
    "counter"
    (sub1 (cross-state-count state))))
 
-; todo tests
+(check-error (checked-area-of-disk "one") "area-of-disk: positive number expected")
+(check-error (checked-area-of-disk -1) "area-of-disk: positive number expected")
+(check-expect (checked-area-of-disk 0) 0.0)
+(check-expect (checked-area-of-disk 1) 3.14)
+(check-expect (checked-area-of-disk 2) (* 3.14 2 2))
+
+(define (checked-area-of-disk r)
+  (cond
+    [(and
+      (number? r)
+      (>= r 0)) (* 3.14 r r)]
+    [else (error "area-of-disk: positive number expected")]))
+
+(define-struct vec [x y])
+
+(check-error (checked-make-vec 2 "two") "make-vec: positive number expected")
+(check-error (checked-make-vec "two" 2) "make-vec: positive number expected")
+(check-error (checked-make-vec "two" "two") "make-vec: positive number expected")
+(check-error (checked-make-vec 2 -2) "make-vec: positive number expected")
+(check-error (checked-make-vec -2 2) "make-vec: positive number expected")
+(check-error (checked-make-vec -2 -2) "make-vec: positive number expected")
+(check-expect (checked-make-vec 2 2) (make-vec 2 2))
+
+(define (checked-make-vec x y)
+  (cond
+    [(and
+      (number? x) (number? y)
+      (>= x 0) (>= y 0)) (make-vec x y)]
+    [else (error "make-vec: positive number expected")]))
+
+(check-expect (missile-or-not? #false) #true)
+(check-expect (missile-or-not? (make-posn 1 2)) #true)
+(check-expect (missile-or-not? #true) #false)
+(check-expect (missile-or-not? "nope") #false)
+
+(define (missile-or-not? v)
+  (cond
+    [(or
+      (false? v)
+      (posn? v)) #true]
+    [else #false]))
+
+; skipped 113
