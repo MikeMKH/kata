@@ -115,4 +115,32 @@
       (posn? v)) #true]
     [else #false]))
 
-; skipped 113
+; skipped 113 - 114
+
+(check-expect (checked-light? "red") #true)
+(check-expect (checked-light? "green") #true)
+(check-expect (checked-light? "yellow") #true)
+(check-expect (checked-light? #false) #false)
+(check-expect (checked-light? "orange") #false)
+
+(define (checked-light? l)
+  (cond
+    [(not (string? l)) #false]
+    [else (or
+      (string=? l "red")
+      (string=? l "yellow")
+      (string=? l "green"))]))
+
+(check-error (light=? #false 0.0) "light=?: expects a light as 1st argument, given #f")
+(check-error (light=? "red" 0.0) "light=?: expects a light as 2nd argument, given 0")
+(check-expect (light=? "red" "green") #false)
+(check-expect (light=? "green" "green") #true)
+
+(define (light=? l1 l2)
+  (cond
+    [(not (checked-light? l1)) (error (format "light=?: expects a light as 1st argument, given ~a" l1))]
+    [(not (checked-light? l2)) (error (format "light=?: expects a light as 2nd argument, given ~a" l2))]
+    [(and
+      (checked-light? l1) (checked-light? l2)
+      (string=? l1 l2)) #true]
+    [else #false]))
