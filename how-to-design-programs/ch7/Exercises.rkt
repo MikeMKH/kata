@@ -43,3 +43,29 @@
 
 ; did 124 in head
 
+(define-struct oops [])
+
+(check-expect (make-oops) (make-oops))
+
+; did rest of 125 in head
+
+; skipped 126
+
+(define-struct ball [x y speed-x speed-y])
+
+(check-expect (number? (make-ball 1 2 3 4)) #false)
+(check-expect 3
+              (ball-speed-y (make-ball (+ 1 2) (+ 3 3) 2 3)))
+(check-expect (+ 3 3)
+              (ball-y (make-ball (+ 1 2) (+ 3 3) 2 3)))
+(check-error (ball-x (make-posn 1 2)) "ball-x: expects a ball, given (make-posn 1 2)")
+(check-error (ball-speed-y 5) "ball-speed-y: expects a ball, given 5")
+
+(check-member-of "green" "red" "yellow" "green")
+(check-within (make-posn #i1.0 #i1.1)
+              (make-posn #i0.999 #i1.1)  0.01)
+(check-range #i0.8 #i0.6 #i0.8)
+(check-random (make-posn (random 3) (random 9))
+              (make-posn (random 3) (random 9)))
+(check-satisfied 5 odd?)
+
