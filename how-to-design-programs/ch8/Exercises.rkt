@@ -36,3 +36,56 @@
 ; List-of-booleans
 ; - '()
 ; - (cons Boolean List-of-booleans)
+
+(check-expect (contains-flatt?
+               (cons "Fagan"
+                     (cons "Findler"
+                           (cons "Fisler"
+                                 (cons "Flanagan"
+                                       (cons "Flatt"
+                                             (cons "Felleisen"
+                                                   (cons "Friedman" '()))))))))
+               #true)
+
+(check-expect (contains-flatt? '()) #false)
+
+(define (contains-flatt? col)
+  (cond
+    [(empty? col) #false]
+    [else (or
+      (string=? (first col) "Flatt")
+      (contains-flatt? (rest col)))]))
+
+(check-expect (contains-flatt?2 (cons "Felleisen" (cons "Flatt" '()))) #true)
+(check-expect (contains-flatt?2 '()) #false)
+
+(define (contains-flatt?2 col)
+  (cond
+    [(empty? col) #false]
+    [else (cond
+            [(string=? (first col) "Flatt") #true]
+            [else (contains-flatt?2 (rest col))])]))
+
+(check-expect (contains? "Mike" (cons "Jack" (cons "Kelsey" '()))) #false)
+(check-expect (contains? "2" (cons "1" (cons "2" (cons "3" '())))) #true)
+
+(define (contains? s col)
+  (cond
+    [(empty? col) #false]
+    [else (or
+           (string=? s (first col))
+           (contains? s (rest col)))]))
+
+(check-expect
+ (contains-flatt?
+  (cons "Flatt" (cons "C" '()))) #true)
+
+(check-expect
+ (contains-flatt?
+  (cons "A" (cons "Flatt" (cons "C" '())))) #true)
+
+(check-expect
+ (first (cons "a" '())) "a")
+
+(check-expect
+ (rest (cons "a" '())) '())
