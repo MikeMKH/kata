@@ -51,3 +51,59 @@
            (all-true (rest bools)))]))
 
 ; skipped 141 - 142
+
+(check-expect (how-many '()) 0)
+(check-expect (how-many (cons "one" (cons "two" '()))) 2)
+
+(define (how-many col)
+  (cond
+    [(empty? col) 0]
+    [else (add1 (how-many (rest col)))]))
+
+(check-expect (average (cons 1 (cons 2 (cons 3 '())))) 2)
+(check-error (average '()) "/: division by zero")
+
+(define (average nums)
+  (/ (sum nums)
+     (how-many nums)))
+
+(check-expect (checked-average (cons 1 (cons 2 (cons 3 '())))) 2)
+(check-error (checked-average '()) "checked-average: cannot average empty")
+
+(define (checked-average nums)
+  (cond
+    [(empty? nums) (error "checked-average: cannot average empty")]
+    [else (average nums)]))
+
+; 144, yes non-empty list are just list with atleast one element
+
+(check-expect (sorted>? (cons 1 '())) #true)
+(check-expect (sorted>? (cons 2 (cons 1 '()))) #true)
+(check-expect (sorted>? (cons 1 (cons 2 '()))) #false)
+(check-expect (sorted>? (cons 3 (cons 2 (cons 1 '())))) #true)
+(check-expect (sorted>? (cons 3 (cons -2 (cons 1 '())))) #false)
+
+(define (sorted>? ne-l)
+  (cond
+    [(empty? (rest ne-l)) #true]
+    [else (and
+           (> (first ne-l) (first (rest ne-l)))
+           (sorted>? (rest ne-l)))]))
+
+; 146, done
+
+; TODO 147 - 148
+
+(check-expect (copier 0 "hello") '())
+(check-expect (copier 2 "hello") (cons "hello" (cons "hello" '())))
+
+(define (copier n x)
+  (cond
+    [(zero? n) '()]
+    [else (cons x (copier (sub1 n) x))]))
+
+; 149, no but it could just replace cons with add1
+
+; TODO 150 - 151
+
+; skipped, 152 - 153
