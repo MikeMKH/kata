@@ -92,7 +92,36 @@
 
 ; 146, done
 
-; TODO 147 - 148
+(check-expect (ne-all-true (cons #true '())) #true)
+(check-expect (ne-all-true (cons #false '())) #false)
+(check-expect (ne-all-true (cons #true (cons #true '()))) #true)
+(check-expect (ne-all-true (cons #true (cons #false '()))) #false)
+
+(define (ne-all-true ne-l)
+  (cond
+    [(empty? (rest ne-l)) (first ne-l)]
+    [else (and
+           (first ne-l)
+           (ne-all-true (rest ne-l)))]))
+
+(check-expect (ne-sum (cons 0 '())) 0)
+(check-expect (ne-sum (cons 1 (cons 1 '()))) 2)
+(check-expect (ne-sum (cons 1 (cons 3 '()))) 4)
+
+(define (ne-sum ne-l)
+  (cond
+    [(empty? (rest ne-l)) (first ne-l)]
+    [else (+
+           (first ne-l)
+           (ne-sum (rest ne-l)))]))
+
+(check-expect (ne-how-many (cons 1 '())) 1)
+(check-expect (ne-how-many (cons "a" (cons "b" '()))) 2)
+
+(define (ne-how-many ne-l)
+  (cond
+    [(empty? (rest ne-l)) 1]
+    [else (add1 (ne-how-many (rest ne-l)))]))
 
 (check-expect (copier 0 "hello") '())
 (check-expect (copier 2 "hello") (cons "hello" (cons "hello" '())))
@@ -104,6 +133,27 @@
 
 ; 149, no but it could just replace cons with add1
 
-; TODO 150 - 151
+(check-within (add-pi 0) pi 0.001)
+(check-within (add-pi 1) (+ pi 1) 0.001)
+(check-within (add-pi 100) (+ pi 100) 0.001)
+
+(define (add-pi n)
+  (cond
+    [(zero? n) pi]
+    [else (add1 (add-pi (sub1 n)))]))
+
+(check-expect (multiply 0 0) 0)
+(check-expect (multiply 8 0) 0)
+(check-expect (multiply 0 9) 0)
+(check-expect (multiply 1 1) 1)
+(check-expect (multiply 7 1) 7)
+(check-expect (multiply 1 6) 6)
+(check-expect (multiply 2 3) 6)
+(check-expect (multiply 20 33) 660)
+
+(define (multiply x y)
+  (cond
+    [(zero? x) 0]
+    [else (+ y (multiply y (sub1 x)))]))
 
 ; skipped, 152 - 153
