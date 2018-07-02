@@ -157,3 +157,25 @@
     [else (+ y (multiply y (sub1 x)))]))
 
 ; skipped, 152 - 153
+
+(define-struct layer [color doll])
+
+(check-expect
+ (colors (make-layer "yellow" (make-layer "green" "red")))
+ "yellow, green, red")
+
+(define (colors rd)
+  (cond
+    [(string? rd) rd]
+    [(layer? rd) (string-append
+                  (layer-color rd) ", "
+                  (colors (layer-doll rd)))]))
+
+(check-expect
+ (inner (make-layer "yellow" (make-layer "green" "red")))
+ "red")
+
+(define (inner rd)
+  (cond
+    [(string? rd) rd]
+    [(layer? rd) (inner (layer-doll rd))]))
