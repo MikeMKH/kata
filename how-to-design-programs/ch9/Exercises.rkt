@@ -179,3 +179,47 @@
   (cond
     [(string? rd) rd]
     [(layer? rd) (inner (layer-doll rd))]))
+
+; skipped, 156 - 159
+
+(check-expect (in? es es) #false)
+(check-expect (in? es (cons 1 es)) #false)
+(check-expect (in? 1 (cons 1 es)) #true)
+(check-expect (in? 2 (cons 1 es)) #false)
+
+(define es '())
+
+(define (in? x s)
+  (member? x s))
+
+(check-expect (set-.L 1 s1.L) es)
+(check-expect (set-.R 1 s1.R) es)
+
+(define s1.L
+  (cons 1 (cons 1 es)))
+
+(define s1.R
+  (cons 1 es))
+
+(define (set-.L x s)
+  (remove-all x s))
+
+(define (set-.R x s)
+  (remove x s))
+
+(define (in-1? s)
+  (in? 1 s))
+
+(check-satisfied (set+.L 1 s1.L) in-1?)
+(check-expect (set+.L 1 es) (cons 1 es))
+(check-expect (set+.L 1 (set+.L 1 es)) s1.L)
+(check-expect (set+.R 1 s1.R) (cons 1 es))
+(check-expect (set+.R 1 es) s1.R)
+
+(define (set+.L x s)
+  (cons x s))
+
+(define (set+.R x s)
+  (cond
+    [(in? x s) s]
+    [else (cons x s)]))
