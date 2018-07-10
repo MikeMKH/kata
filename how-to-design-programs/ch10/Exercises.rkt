@@ -52,4 +52,62 @@
 (define (usd->eur usd)
   (* usd 0.85))
 
-; TODO 164 - 165
+(check-expect (convert 0.85 0) 0)
+(check-expect (convert 1 0) 0)
+(check-expect (convert 0.85 10) 8.5)
+(check-expect (convert 1 10) 10)
+
+(define (convert conversion amount)
+  (* conversion amount))
+
+(check-expect (convert* 0.85 '()) '())
+(check-expect (convert* 0.85 (cons 10 (cons 0 '()))) (cons 8.5 (cons 0 '())))
+(check-expect (convert* 1 '()) '())
+(check-expect (convert* 1 (cons 10 (cons 2 '()))) (cons 10 (cons 2 '())))
+
+(define (convert* conversion amounts)
+  (cond
+    [(empty? amounts) '()]
+    [else (cons
+           (convert conversion (first amounts))
+           (convert* conversion (rest amounts)))]))
+
+(check-expect (subst-robot '()) '())
+(check-expect (subst-robot (cons "something" '())) (cons "something" '()))
+(check-expect (subst-robot (cons "robot" '())) (cons "r2d2" '()))
+(check-expect (subst-robot (cons "something" (cons "robot" '()))) (cons "something" (cons "r2d2" '())))
+(check-expect (subst-robot (cons "robot" (cons "robot" '()))) (cons "r2d2" (cons "r2d2" '())))
+
+(define (subst-robot strs)
+  (cond
+    [(empty? strs) '()]
+    [else (cons
+           (if (string=? (first strs) "robot") "r2d2" (first strs))
+           (subst-robot (rest strs)))]))
+
+(define-struct workrec [empid employee rate hours])
+(define-struct paycheck [empid employee amount])
+
+(check-expect (workrec-wage (make-workrec 123 "Mike" 89.00 40)) (make-paycheck 123 "Mike" (* 89.00 40)))
+(check-expect (workrec-wage (make-workrec 456 "Jack" 0.10 2)) (make-paycheck 456 "Jack" 0.20))
+
+(define (workrec-wage rec)
+  (make-paycheck
+   (workrec-empid rec)
+   (workrec-employee rec)
+   (* (workrec-rate rec) (workrec-hours rec))))
+
+(check-expect (workrec-wage* '()) '())
+(check-expect (workrec-wage*
+               (cons (make-workrec 1 "Kelsey" 1000000 1) '()))
+               (cons (make-paycheck 1 "Kelsey" 1000000) '()))
+(check-expect (workrec-wage*
+               (cons (make-workrec 999 "B" 11.99 40) (cons (make-workrec 789 "A" 12.0 40) '())))
+               (cons (make-paycheck 999 "B" (* 11.99 40)) (cons (make-paycheck 789 "A" (* 12.0 40)) '())))
+
+(define (workrec-wage* recs)
+  (cond
+    [(empty? recs) '()]
+    [else (cons (workrec-wage (first recs)) (workrec-wage* (rest recs)))]))
+
+; TODO 167 - 170
