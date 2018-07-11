@@ -110,4 +110,91 @@
     [(empty? recs) '()]
     [else (cons (workrec-wage (first recs)) (workrec-wage* (rest recs)))]))
 
-; TODO 167 - 170
+(check-expect (sum '()) 0)
+(check-expect (sum (cons (make-posn 1 2) '())) 1)
+(check-expect (sum (cons (make-posn 0 1) (cons (make-posn 1 2) '()))) 1)
+(check-expect (sum (cons (make-posn 10 10) (cons (make-posn 0 1) (cons (make-posn 1 2) '())))) 11)
+
+(define (sum posns)
+  (cond
+    [(empty? posns) 0]
+    [else (+ (posn-x (first posns))
+             (sum (rest posns)))]))
+
+(check-expect (translate (make-posn 0 0)) (make-posn 0 1))
+(check-expect (translate (make-posn 10 20)) (make-posn 10 21))
+(check-expect (translate (make-posn -11 42)) (make-posn -11 43))
+(check-expect (translate (make-posn -11 -42)) (make-posn -11 -41))
+
+(define (translate p)
+  (make-posn
+   (posn-x p)
+   (add1 (posn-y p))))
+
+(check-expect (translate* '()) '())
+(check-expect (translate* (cons (make-posn 0 0) '())) (cons (make-posn 0 1) '()))
+(check-expect (translate* (cons (make-posn 10 20) (cons (make-posn 0 0) '()))) (cons (make-posn 10 21) (cons (make-posn 0 1) '())))
+
+(define (translate* posns)
+  (cond
+    [(empty? posns) '()]
+    [else (cons (translate (first posns)) (translate* (rest posns)))]))
+
+(check-expect (legal? (make-posn 0 0)) #true)
+(check-expect (legal? (make-posn -1 0)) #false)
+(check-expect (legal? (make-posn 0 -1)) #false)
+(check-expect (legal? (make-posn -1 -1)) #false)
+(check-expect (legal? (make-posn 42 113)) #true)
+(check-expect (legal? (make-posn 100 200)) #true)
+(check-expect (legal? (make-posn 101 200)) #false)
+(check-expect (legal? (make-posn 100 201)) #false)
+(check-expect (legal? (make-posn 101 201)) #false)
+
+(define (legal? p)
+  (and
+   (and (>= (posn-x p) 0) (<= (posn-x p) 100))
+   (and (>= (posn-y p) 0) (<= (posn-y p) 200))))
+
+(check-expect (legal '()) '())
+(check-expect (legal (cons (make-posn 0 0) '())) (cons (make-posn 0 0) '()))
+(check-expect (legal (cons (make-posn 100 200) (cons (make-posn 0 0) '()))) (cons (make-posn 100 200) (cons (make-posn 0 0) '())))
+(check-expect (legal (cons (make-posn 101 200) (cons (make-posn 0 0) '()))) (cons (make-posn 0 0) '()))
+(check-expect (legal (cons (make-posn 100 200) (cons (make-posn -1 0) '()))) (cons (make-posn 100 200) '()))
+
+(define (legal posns)
+  (cond
+    [(empty? posns) '()]
+    [else
+     (if (legal? (first posns))
+         (cons (first posns) (legal (rest posns)))
+         (legal (rest posns)))]))
+
+(define-struct phone [area switch four])
+
+(check-expect (replace (make-phone 713 555 5555)) (make-phone 281 555 5555))
+(check-expect (replace (make-phone 555 555 5555)) (make-phone 555 555 5555))
+(check-expect (replace (make-phone 713 111 5555)) (make-phone 281 111 5555))
+
+(define (replace ph)
+  (make-phone
+   (if (= (phone-area ph) 713) 281 (phone-area ph))
+   (phone-switch ph)
+   (phone-four ph)))
+
+(check-expect (replace* '())
+              '())
+(check-expect (replace* (cons (make-phone 713 555 5555) '()))
+              (cons (make-phone 281 555 5555) '()))
+(check-expect (replace* (cons (make-phone 555 555 5555) '()))
+              (cons (make-phone 555 555 5555) '()))
+(check-expect (replace* (cons (make-phone 713 111 5555) '()))
+              (cons (make-phone 281 111 5555) '()))
+(check-expect (replace* (cons (make-phone 111 111 1111) (cons (make-phone 555 555 5555) '())))
+              (cons (make-phone 111 111 1111) (cons (make-phone 555 555 5555) '())))
+(check-expect (replace* (cons (make-phone 713 111 1111) (cons (make-phone 713 555 5555) '())))
+              (cons (make-phone 281 111 1111) (cons (make-phone 281 555 5555) '())))
+
+(define (replace* phones)
+  (cond
+    [(empty? phones) '()]
+    [else (cons (replace (first phones)) (replace* (rest phones)))]))
