@@ -198,3 +198,39 @@
   (cond
     [(empty? phones) '()]
     [else (cons (replace (first phones)) (replace* (rest phones)))]))
+
+(require 2htdp/batch-io)
+
+(check-expect (first (read-lines "ttt.txt")) "Put up in a place")
+(check-expect (first (read-words "ttt.txt")) "Put")
+
+(check-expect (line->string '()) "")
+(check-expect (line->string (cons "1" '())) "1")
+(check-expect (line->string (cons "hello" (cons "world" '()))) "hello world")
+(check-expect (line->string (cons "\n" '())) "")
+(check-expect (line->string (cons " " '())) "")
+;(check-expect (line->string (cons "\n" (cons "hello" (cons " " '())))) "hello") ;need to filter whitespace and then string-append, filter is not in BSL
+
+(define (line->string lines)
+  (cond
+    [(empty? lines) ""]
+    [else
+     (if (string-whitespace? (first lines))
+         (line->string (rest lines))
+         (string-append (first lines) (if (empty? (rest lines))
+                                          ""
+                                          (string-append " " (line->string (rest lines))))))]))
+
+(check-expect
+ (read-lines
+  (write-file "ttt.dat"
+              (collapse (read-words/line "ttt.txt"))))
+ (read-lines "ttt.txt"))
+
+(define (collapse lls)
+  (cond
+    [(empty? lls) ""]
+    [else
+     (string-append (line->string (first lls)) "\n" (collapse (rest lls)))]))
+
+; skipped 173 - 179
