@@ -87,3 +87,65 @@
 (check-expect
  (fourth (list 1 2 3 4))
  4)
+
+(check-satisfied
+ (list 9 8 7 6 5 4 3 2 1 0) sorted>?)
+
+(define (sorted>? col)
+  (cond
+    [(empty? (rest col)) #true]
+    [else
+     (and
+      (> (first col) (first (rest col)))
+      (sorted>? (rest col)))]))
+
+(define-struct gp [name score])
+
+(check-expect
+ (gp-sort> (list (make-gp "One" 100) (make-gp "Two" 200)))
+ (list (make-gp "Two" 200) (make-gp "One" 100)))
+
+(check-expect
+ (gp-sort> (list (make-gp "One" 200) (make-gp "Two" 100)))
+ (list (make-gp "One" 200) (make-gp "Two" 100)))
+
+(check-expect
+ (gp-sort> (list (make-gp "1" 9) (make-gp "2" 3) (make-gp "3" 6)))
+ (list (make-gp "1" 9) (make-gp "3" 6) (make-gp "2" 3)))
+
+(check-expect (gp-sort> '()) '())
+
+(define (gp-sort> players)
+  (cond
+    [(empty? players) '()]
+    [(cons? players) (gp-insert (first players) (gp-sort> (rest players)))]))
+
+(define (gp-insert p ps)
+  (cond
+    [(empty? ps) (cons p '())]
+    [else
+     (if (>= (gp-score p) (gp-score (first ps)))
+         (cons p ps)
+         (cons (first ps)
+               (gp-insert p (rest ps))))]))
+
+; skipped 188, similar to above
+
+(check-expect (search-sorted (list 9 8 7) 9) #true)
+(check-expect (search-sorted (list 9 8 7) 8) #true)
+(check-expect (search-sorted (list 9 8 7) 7) #true)
+(check-expect (search-sorted (list 9 8 7) 10) #false)
+(check-expect (search-sorted (list 9 8 7) 6) #false)
+(check-expect (search-sorted '() 1) #false)
+
+(define (search-sorted ns n)
+  (cond
+    [(empty? ns) #false]
+    [(= n (first ns)) #true]
+    [(> n (first ns)) #false]
+    [else
+     (search-sorted (rest ns) n)]))
+
+
+
+; skipped 190 - 193
