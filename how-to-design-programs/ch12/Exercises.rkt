@@ -99,3 +99,41 @@
 
 (define (count-by-letter dictionary)
   (count-by-list LETTERS dictionary))
+
+; skipped 197 - 208
+
+(check-expect (string->word "cat") (list "c" "a" "t"))
+
+(define (string->word str) (explode str))
+
+(check-expect (word->string (list "c" "a" "t")) "cat")
+(check-expect (word->string (string->word "hello world")) "hello world")
+
+(define (word->string word) (implode word))
+
+(check-expect (words->strings '()) '())
+(check-expect (words->strings (list '())) (list ""))
+(check-expect (words->strings (list (string->word "hello") (string->word "world"))) (list "hello" "world"))
+
+(define (words->strings ws)
+  (cond
+    [(empty? ws) '()]
+    [(cons? ws)
+     (cons (word->string (first ws)) (words->strings (rest ws)))]))
+
+(check-expect (in-dictionary (list "words") '()) '())
+(check-expect (in-dictionary (list "yes") (list "yes")) (list "yes"))
+(check-expect (in-dictionary (list "yes") (list "no-zzz" "yes")) (list "yes"))
+(check-expect (in-dictionary (list "hello" "world") (list "hello" "world")) (list "hello" "world"))
+(check-expect (in-dictionary (list "maybe" "yes") (list "maybe" "no-zzz" "yes")) (list "maybe" "yes"))
+
+(define (in-dictionary dictionary los)
+  (cond
+    [(empty? los) '()]
+    [(cons? los)
+     ; BSL does not have a when, so we need to remove unmatched
+     (remove-all #false (cons
+      (if (member? (first los) dictionary)
+          (first los)
+          #false)
+      (in-dictionary dictionary (rest los))))]))
