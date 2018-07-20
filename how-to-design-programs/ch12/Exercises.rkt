@@ -137,3 +137,47 @@
           (first los)
           #false)
       (in-dictionary dictionary (rest los))))]))
+
+(check-expect
+ (list (string->word "cat") (string->word "act"))
+ (list (cons "c" (cons "a" (cons "t" '()))) (cons "a" (cons "c" (cons "t" '())))))
+
+(check-expect
+ (insert-everywhere/in-words "z" '())
+ (string->word "z"))
+
+(check-expect
+ (insert-everywhere/in-words "z" (string->word "a"))
+ (string->word "zaz"))
+
+(check-expect
+ (insert-everywhere/in-words "z" (string->word "ab"))
+ (string->word "zazbz"))
+
+(define (insert-everywhere/in-words letter word)
+  (cond
+    [(empty? word) (list letter)]
+    [(cons? word)
+     (cons letter
+           (cons (first word)
+                 (insert-everywhere/in-words letter (rest word))))]))
+
+(check-expect
+ (insert-everywhere/in-all-words "z" '()) '())
+
+(check-expect
+ (insert-everywhere/in-all-words "z" (list (string->word "cat")))
+ (list (string->word "zczaztz")))
+
+(check-expect
+ (insert-everywhere/in-all-words "z" (list (string->word "cat") (string->word "act")))
+ (list (string->word "zczaztz") (string->word "zazcztz")))
+
+(define (insert-everywhere/in-all-words letter ws)
+  (cond
+    [(empty? ws) '()]
+    [(cons? ws)
+     (cons (insert-everywhere/in-words letter (first ws))
+           (insert-everywhere/in-all-words letter (rest ws)))]))
+
+; skipped 124
