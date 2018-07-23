@@ -180,4 +180,60 @@
      (cons (insert-everywhere/in-words letter (first ws))
            (insert-everywhere/in-all-words letter (rest ws)))]))
 
-; skipped 124
+; skipped 124 - 225
+
+(define-struct transition [current next])
+
+(check-expect (state=? "green" "red") #false)
+(check-expect (state=? "green" "green") #true)
+(check-expect (state=? "red" "red") #true)
+(check-expect (state=? "yellow" "yellow") #true)
+(check-expect (state=? "yellow" "green") #false)
+(check-expect (state=? "yellow" 7) #false)
+
+(define (state=? st1 st2)
+  (cond
+    [(and (string? st1) (string? st2))
+      (string=? st1 st2)]
+    [else #false]))
+
+(check-expect (flip "black") "white")
+(check-expect (flip "white") "black")
+(check-expect (flip (flip "black")) "black")
+(check-expect (flip (flip "white")) "white")
+
+(define (flip bwsm)
+  (cond
+    [(string=? bwsm "black") "white"]
+    [(string=? bwsm "white") "black"]))
+
+; skipped 229
+
+(define-struct fsm [initial trans final])
+(define-struct trans [current key next])
+
+; a(b|c)*d
+(define fsm-abcd (make-fsm
+               "a"
+               (list
+                (make-trans "a" "b" "b")
+                (make-trans "b" "b" "b")
+                (make-trans "b" "c" "b")
+                (make-trans "b" "d" "d")
+                )
+               "d"))
+
+(check-expect (find fsm-abcd "b") "b")
+(check-expect (find fsm-abcd "c") "b")
+(check-error (find fsm-abcd "z") "not found: z")
+
+(define (find-transition transitions key)
+  (cond
+    [(empty? transitions) (error (string-append "not found: " key))]
+    [else
+     (if (string=? (trans-key (first transitions)) key)
+         (trans-next (first transitions))
+         (find-transition (rest transitions) key))]))
+
+(define (find fsm key)
+  (find-transition (fsm-trans fsm) key))
