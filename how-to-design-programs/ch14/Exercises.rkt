@@ -58,3 +58,48 @@
 
 (define (inf nelon) (most min nelon))
 (define (sup nelon) (most max nelon))
+
+; skipped 239
+
+(define-struct layer [stuff])
+
+(check-expect (layer-stuff (layer-stuff (make-layer (make-layer 1)))) 1)
+(check-expect (layer-stuff (layer-stuff (make-layer (make-layer "hello")))) "hello")
+
+; skipped 241 - 242
+
+(define (f x) x)
+
+(check-satisfied (first (cons f '())) procedure?)
+(check-satisfied (f f) procedure?)
+(check-satisfied (first (cons f (cons 10 (cons (f 10) '())))) procedure?)
+
+; functions can be used as params in ISL
+
+(define (k0 c) 0)
+
+(check-expect (function=at-1.2-3-and-5.775? k0) #true)
+(check-expect (function=at-1.2-3-and-5.775? f) #false)
+
+(define (function=at-1.2-3-and-5.775? f)
+  (= (f 1.2) (f 3) (f 5.775)))
+
+(check-expect
+ (extract < (cons 6 (cons 4 '())) 5)
+ (extract < (cons 4 '()) 5))
+(check-expect
+ (extract < (cons 8 (cons 4 '())) 5)
+ (list 4))
+(check-expect
+ (extract squared>? (list 3 4 5) 10)
+ (list 4 5))
+
+(define (extract R lon n)
+  (cond
+    [(empty? lon) '()]
+    [else
+     (if (R (first lon) n)
+         (cons (first lon) (extract R (rest lon) n))
+         (extract R (rest lon) n))]))
+
+; 249 is done?
