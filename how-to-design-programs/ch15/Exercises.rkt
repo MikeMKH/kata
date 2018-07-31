@@ -38,3 +38,31 @@
     [else
      (f (first l)
         (fold2 f seed (rest l)))]))
+
+; skipped 253
+
+; sort-n
+; [List-of Number] -> [Number -> Number -> Boolean] -> [List-of Number]
+
+; sort-s
+; [List-of String] -> [String -> String -> Boolean] -> [List-of String]
+
+; sort-X
+; [X] -> [List-of X] -> [X -> X -> Boolean] -> [List-of X]
+
+; map-n
+; [List-of Number] -> [Number -> Number] -> [List-of Number]
+
+; map-XY
+; [X Y] -> [List-of X] -> [X -> Y] -> [List-of Y]
+
+(check-expect (map1 add1 '()) '())
+(check-expect (map1 add1 (list 1 2)) (list 2 3))
+(check-expect (map1 number->string (list 1 2)) (list "1" "2"))
+
+(define (map1 f l)
+  (cond
+    [(empty? l) '()]
+    [else
+     (cons (f (first l))
+           (map1 f (rest l)))]))
