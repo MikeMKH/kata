@@ -35,4 +35,32 @@
     [else (min (first l)
                (inf-min (rest l)))]))
 
-; todo 261
+; skipped 261
+
+(check-expect (identityM 0) '())
+(check-expect (identityM 1) (list (list 1)))
+(check-expect (identityM 2) '((1 0)
+                              (0 1)))
+(check-expect (identityM 3) '((1 0 0)
+                              (0 1 0)
+                              (0 0 1)))
+
+(define (identityM m)
+  (local (
+    (define cols m)
+    (define (generate-matrix n)
+      (cond
+        [(zero? n) '()]
+        [else
+         (cons
+           (generate-row n cols)
+           (generate-matrix (sub1 n)))]))
+    (define (generate-row a b)
+      (cond
+        [(zero? b) '()]
+        [else
+         (cons (if (= a b) 1 0)
+               (generate-row a (sub1 b)))])))
+    (generate-matrix m)))
+
+; did 265 - 266
