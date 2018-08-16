@@ -79,3 +79,39 @@
   (andmap (lambda (n) (string-ci=? name (string-ith n 0))) names))
 
 ; todo 290 - 291
+
+(check-expect (sorted? < '()) #true)
+(check-expect (sorted? < '(1 2 3)) #true)
+(check-expect (sorted? < '(3 2 3)) #false)
+
+(define (sorted? cmp l)
+  (cond
+    [(or
+      (empty? l)
+      (empty? (rest l))) #true]
+    [else
+     (and (if (cmp (first l) (first (rest l)))
+              #true
+              #false)
+          (sorted? cmp (rest l)))]))
+
+(check-expect ((found? 1 '(1)) '(1)) #true)
+(check-expect ((found? 1 '(1 2)) '(1 2)) #true)
+(check-expect ((found? 2 '(1)) '(1)) #false)
+
+(define (found? x l0)
+  (lambda (l)
+    (if (list? l)
+        (equal? x (first l))
+        (andmap (lambda (i) (not (equal? i x))) l0))))
+
+(define (find x l)
+  (cond
+    [(empty? l) #false]
+    [else
+     (if (equal? (first l) x) l (find x (rest l)))]))
+
+(check-satisfied (find "needle" '("haystack" "needle")) (found? "needle" '("haystack" "needle")))
+(check-satisfied (find "needle" '("haystack")) (found? "needle" '("haystack")))
+
+; skip 294 - 295
