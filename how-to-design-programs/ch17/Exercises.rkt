@@ -78,7 +78,7 @@
 (define (start-name name names)
   (andmap (lambda (n) (string-ci=? name (string-ith n 0))) names))
 
-; todo 290 - 291
+; skipped 290 - 291
 
 (check-expect (sorted? < '()) #true)
 (check-expect (sorted? < '(1 2 3)) #true)
@@ -114,4 +114,54 @@
 (check-satisfied (find "needle" '("haystack" "needle")) (found? "needle" '("haystack" "needle")))
 (check-satisfied (find "needle" '("haystack")) (found? "needle" '("haystack")))
 
-; skip 294 - 295
+; skip 294 - 298
+
+(define (mk-set predicate)
+  (lambda (x)
+    (predicate x)))
+
+(define even (mk-set (lambda (n) (even? n))))
+(check-expect (even 2) #true)
+(check-expect (even 3) #false)
+(check-expect (even 9992) #true)
+
+(define odd (mk-set (lambda (n) (odd? n))))
+(check-expect (odd 1) #true)
+(check-expect (odd 2) #false)
+(check-expect (odd 2221) #true)
+
+(define divisible-by-10 (mk-set (lambda (n) (zero? (modulo n 10)))))
+(check-expect (divisible-by-10 10) #true)
+(check-expect (divisible-by-10 11) #false)
+(check-expect (divisible-by-10 11111110) #true)
+
+(define (add-element set elm)
+  (lambda (n)
+    (or
+     (= elm n)
+     (set n))))
+
+(check-expect ((add-element divisible-by-10 11) 11) #true)
+(check-expect ((add-element divisible-by-10 11) 12) #false)
+(check-expect ((add-element divisible-by-10 11) 20) #true)
+
+(define (union s1 s2)
+  (lambda (n)
+    (or (s1 n) (s2 n))))
+
+(define even-or-7
+  (union even (mk-set (lambda (n) (= 7 n)))))
+(check-expect (even-or-7 2) #true)
+(check-expect (even-or-7 7) #true)
+(check-expect (even-or-7 3) #false)
+(check-expect (even-or-7 77) #false)
+
+(define (intersect s1 s2)
+  (lambda (n)
+    (and (s1 n) (s2 n))))
+
+(define even-and-divisible-by-10
+  (intersect even divisible-by-10))
+(check-expect (even-and-divisible-by-10 10) #true)
+(check-expect (even-and-divisible-by-10 2) #false)
+(check-expect (even-and-divisible-by-10 22220) #true)
