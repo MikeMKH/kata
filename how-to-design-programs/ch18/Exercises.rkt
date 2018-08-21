@@ -52,3 +52,20 @@
   (for/list ([i n]) (f i)))
 
 ; skipped 307
+
+(define-struct phone [area switch four])
+
+(check-expect (replace '()) '())
+(check-expect
+ (replace (list (make-phone 713 664 9993) (make-phone 555 555 5555)))
+ (list (make-phone 281 664 9993) (make-phone 555 555 5555)))
+(check-expect
+ (replace (list (make-phone 111 111 1111) (make-phone 222 222 2222)))
+ (list (make-phone 111 111 1111) (make-phone 222 222 2222)))
+
+(define (replace lop)
+  (for/list ([ph lop])
+    (match ph
+      [(phone 713 area four) (make-phone 281 area four)]
+      [p p])))
+
