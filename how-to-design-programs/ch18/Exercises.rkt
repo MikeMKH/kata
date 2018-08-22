@@ -69,3 +69,12 @@
       [(phone 713 area four) (make-phone 281 area four)]
       [p p])))
 
+(check-expect (words-on-line '()) '())
+(check-expect (words-on-line (list '())) '(0))
+(check-expect (words-on-line (list (list "hello" "world"))) '(2))
+(check-expect (words-on-line (list (list "hello") (list "world"))) '(1 1))
+(check-expect (words-on-line (list (list "hello" "world") (list "goodbye"))) '(2 1))
+
+(define (words-on-line lines)
+  (for/list ([line lines])
+    (length line)))
