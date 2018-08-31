@@ -65,4 +65,53 @@
            (append (eye-colors (child-father ftree))
                    (eye-colors (child-mother ftree))))]))
 
-; skipped 313
+; skipped 313 - 314
+
+(define ff0 (list NP))
+(define ff1 (list Carl Bettina))
+(define ff2 (list Fred Eva))
+(define ff3 (list Fred Eva Carl))
+
+(check-expect (ff-sum-age '() 2018) 0)
+(check-expect (ff-sum-age ff0 2018) 0)
+(check-expect (ff-sum-age ff1 1927) 2)
+(check-expect (ff-sum-age ff1 2018) 184)
+(check-expect (ff-sum-age ff2 2018) 289)
+(check-expect (ff-sum-age ff3 2018) 381)
+
+(define (ff-sum-age fforest year)
+  (cond
+    [(empty? fforest) 0]
+    [else
+     (+ (sum-age (first fforest) year)
+        (ff-sum-age (rest fforest) year))]))
+
+(check-expect (ff-count-persons '()) 0)
+(check-expect (ff-count-persons ff0) 0)
+(check-expect (ff-count-persons ff1) 2)
+(check-expect (ff-count-persons ff2) 4)
+(check-expect (ff-count-persons ff3) 5)
+
+(define (ff-count-persons fforest)
+  (cond
+    [(empty? fforest) 0]
+    [else
+     (+ (count-persons (first fforest))
+        (ff-count-persons (rest fforest)))]))
+
+(check-expect (ff-average-age '() 2018) 0)
+(check-expect (ff-average-age ff0 2018) 0)
+(check-expect (ff-average-age ff1 1927) 1)
+(check-expect (ff-average-age ff1 2018) 92)
+(check-expect (ff-average-age ff2 2018) 72.25)
+(check-expect (ff-average-age ff3 2018) 76.2)
+
+(define (ff-average-age forest year)
+  (cond
+    [(empty? forest) 0]
+    [else
+     (local (
+       (define count (ff-count-persons forest)))
+       (if (zero? count)
+           0
+           (/ (ff-sum-age forest year) count)))]))
