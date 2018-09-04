@@ -115,3 +115,62 @@
        (if (zero? count)
            0
            (/ (ff-sum-age forest year) count)))]))
+
+(check-expect (atom? "yes") #true)
+(check-expect (atom? 'symbol) #true)
+(check-expect (atom? 3.14) #true)
+(check-expect (atom? '()) #false)
+(check-expect (atom? (cons 123 '())) #false)
+
+(define (atom? at)
+  (or
+   (string? at)
+   (number? at)
+   (symbol? at)))
+
+(check-expect (count '() 'yes) 0)
+(check-expect (count (list 'yes 'no 'no) 'yes) 1)
+(check-expect (count (list 'yes (list 'no 'yes 'no (list 'no))) 'yes) 2)
+(check-expect (count (list 'no (list 'no 'no 'no (list 'no))) 'yes) 0)
+(check-expect (count (list 'yes (list 'no 'yes "no" (list 123))) 'yes) 2)
+
+; S-expr Symbol -> N 
+; counts all occurrences of sy in sexp 
+(define (count sexp sy)
+  (local (
+          (define (count-sl sl)
+            (cond
+              [(empty? sl) 0]
+              [else
+               (+ (count (first sl) sy) (count-sl (rest sl)))]))
+          (define (count-atom at)
+            (cond
+              [(number? at) 0]
+              [(string? at) 0]
+              [(symbol? at) (if (symbol=? at sy) 1 0)]))
+          )
+    (cond
+      [(atom? sexp) (count-atom sexp)]
+      [else (count-sl sexp)])))
+
+(check-expect (depth 'one) 1)
+(check-expect (depth '()) 2)
+(check-expect (depth (cons 2 '())) 2)
+(check-expect (depth (cons (cons 'three '()) '())) 3)
+(check-expect (depth (list (list (list (list 5))))) 5)
+
+(define (depth sexp)
+  (local (
+          (define (depth-atom at) 1)
+          (define (depth-sl sl)
+            (cond
+              [(empty? sl) 1]
+              [else
+               (max (depth (first sl))
+                    (depth-sl (rest sl)))]))
+          )
+    (cond
+      [(atom? sexp) (depth-atom sexp)]
+      [else (add1 (depth-sl sexp))])))
+
+; skipped 319 - 321
