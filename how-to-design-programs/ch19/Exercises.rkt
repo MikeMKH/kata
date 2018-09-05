@@ -174,3 +174,48 @@
       [else (add1 (depth-sl sexp))])))
 
 ; skipped 319 - 321
+
+(define-struct no-info [])
+(define NONE (make-no-info))
+ 
+(define-struct node [ssn name left right])
+
+(check-expect (contains-bt? 7 NONE) #false)
+(check-expect (contains-bt? 7 (make-node 8 "a" NONE NONE)) #false)
+(check-expect (contains-bt? 8 (make-node 8 "a" NONE NONE)) #true)
+(check-expect (contains-bt? 8 (make-node 88 "a"
+                                         (make-node 8 "b" NONE NONE) NONE)) #true)
+(check-expect (contains-bt? 8 (make-node 888 "a"
+                                         (make-node 88 "b" NONE NONE)
+                                         (make-node 8 "c" NONE NONE))) #true)
+
+(define (contains-bt? ssn bt)
+  (cond
+    [(no-info? bt) #false]
+    [else
+     (if (equal? ssn (node-ssn bt))
+         #true
+         (or
+          (contains-bt? ssn (node-left bt))
+          (contains-bt? ssn (node-right bt))))]))
+
+(check-expect (search-bt 7 NONE) #false)
+(check-expect (search-bt 7 (make-node 8 "a" NONE NONE)) #false)
+(check-expect (search-bt 8 (make-node 8 "a" NONE NONE)) "a")
+(check-expect (search-bt 8 (make-node 88 "a"
+                                      (make-node 8 "b" NONE NONE) NONE)) "b")
+(check-expect (search-bt 8 (make-node 888 "a"
+                                      (make-node 88 "b" NONE NONE)
+                                      (make-node 8 "c" NONE NONE))) "c")
+
+(define (search-bt ssn bt)
+  (cond
+    [(no-info? bt) #false]
+    [else
+     (if (equal? ssn (node-ssn bt))
+         (node-name bt)
+         (if (contains-bt? ssn (node-left bt))
+             (search-bt ssn (node-left bt))
+             (search-bt ssn (node-right bt))))]))
+
+; TODO 324 - 327
