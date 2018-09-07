@@ -34,4 +34,43 @@
            (+ count (if (file.v1? x) 1 (how-many.v1 x))))
          0 dir))
 
-; skipped 332 - 337
+; skipped 332 - 338
+
+(require htdp/dir)
+
+(define ch20
+  (make-dir '/Users/m/K/htdp/ch20 '()
+           (list
+            (make-file "#Exercises.rkt#1#" 13219 (make-date 2018 9 7 6 13 35) "")
+            (make-file "Exercises.rkt" 1189 (make-date 2018 9 6 6 44 36) "")
+            (make-file "Exercises.rkt~" 0 (make-date 2018 9 6 6 13 28) ""))))
+
+(define test
+  (make-dir '/Users/mike/Kata/htdp/ch20/test
+            (list
+             (make-dir '/Users/mike/Kata/htdp/ch20/test/another
+                       (list
+                        (make-dir '/Users/mike/Kata/htdp/ch20/test/another/level '()
+                                  (list (make-file "something.else" 0 (make-date 2018 9 7 6 26 49) ""))))
+                       (list (make-file "find.name" 0 (make-date 2018 9 7 6 26 37) ""))))
+            '()))
+
+(check-expect #false
+              (find? (make-dir '/Users/empty '() '()) "file.name"))
+(check-expect #true
+              (find? (make-dir '/Users/empty '() (list (make-file "file.name" 0 (make-date 2018 9 6 6 13 28) ""))) "file.name"))
+(check-expect #true
+              (find? ch20 "Exercises.rkt"))
+(check-expect #true
+              (find? test "find.name"))
+(check-expect #false
+              (find? test "missing.file"))
+
+(define (find? dir name)
+  (cond
+    [(empty? dir) #false]
+    [else (or
+      (ormap (lambda (file) (string=? (file-name file) name)) (dir-files dir))
+      (ormap (lambda (dir1) (find? dir1 name)) (dir-dirs dir)))]))
+
+; skipped 340 - 344 :(
