@@ -53,8 +53,75 @@
     [(boolean? exp) exp]
     [else (error "unsupported expression")]))
 
-; TODO 349
+; Figure 125: From S-expr to BSL-expr
+
+(define WRONG "invalid expression")
+
+; Any -> Boolean
+(define (atom? x)
+  (or (string? x)
+      (number? x)
+      (symbol? x)))
+
+; S-expr -> BSL-expr
+(define (parse s)
+  (cond
+    [(atom? s) (parse-atom s)]
+    [else (parse-sl s)]))
+ 
+; SL -> BSL-expr 
+(define (parse-sl s)
+  (local ((define L (length s)))
+    (cond
+      [(< L 3) (error WRONG)]
+      [(and (= L 3) (symbol? (first s)))
+       (cond
+         [(symbol=? (first s) '+)
+          (make-add (parse (second s)) (parse (third s)))]
+         [(symbol=? (first s) '*)
+          (make-mul (parse (second s)) (parse (third s)))]
+         [else (error WRONG)])]
+      [else (error WRONG)])))
+ 
+; Atom -> BSL-expr 
+(define (parse-atom s)
+  (cond
+    [(number? s) s]
+    [(string? s) (error WRONG)]
+    [(symbol? s) (error WRONG)]))
+
+(check-expect (parse-atom 3) 3)
+(check-error (parse-atom "3") WRONG)
+(check-error (parse-atom 'three) WRONG)
+
+(check-expect (eval-expression (parse-sl '(+ 2 3))) 5)
+(check-expect (eval-expression (parse-sl '(* 2 3))) 6)
+(check-expect (eval-expression (parse-sl '(* (+ (* 1 2) 5) (* 3 1)))) 21)
+
+(check-error (eval-expression (parse-sl '(* 1 2 3))) WRONG)
+(check-error (eval-expression (parse-sl '(+ 1))) WRONG)
+(check-error (eval-expression (parse-sl '(- 2 1))) WRONG)
+(check-error (eval-expression (parse-sl (list "+" 2 1))) WRONG)
+
+(check-expect (atom? '+) #true)
+(check-expect (atom? 2) #true)
+(check-expect (atom? "2") #true)
+(check-expect (atom? '(+ 2 2)) #false)
+
+(check-expect (parse 3) 3)
+(check-expect (eval-expression (parse '(+ 2 3))) 5)
 
 ; skipped 350
 
-; TODO 351
+(check-expect (interpreter-expression '(+ 2 5)) 7)
+(check-expect (interpreter-expression '(* 2 5)) 10)
+(check-expect (interpreter-expression '(* (+ (* 1 2) 5) (* 3 1))) 21)
+
+(check-expect (interpreter-expression 6) 6)
+
+(check-error (interpreter-expression '(+ 1)) WRONG)
+(check-error (interpreter-expression '(+ 1 2 3)) WRONG)
+(check-error (interpreter-expression (list "+" 2 2)) WRONG)
+
+(define (interpreter-expression exp)
+  (eval-expression (parse exp)))
