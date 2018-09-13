@@ -1,6 +1,8 @@
 ;; The first three lines of this file were inserted by DrRacket. They record metadata
 ;; about the language level of this file in a form that our tools can easily process.
 #reader(lib "htdp-intermediate-lambda-reader.ss" "lang")((modname Exercises) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f () #f)))
+(define WRONG "invalid expression")
+
 (define-struct add [left right])
 (define-struct mul [left right])
 
@@ -9,7 +11,7 @@
 (check-expect (eval-expression (make-add (make-mul 20 3) 33)) 93)
 (check-expect (eval-expression (make-add (make-mul 3.14 (make-mul 2 3)) (make-mul 3.14 (make-mul -1 -9)))) (* 15 3.14))
 
-(check-error (eval-expression "7") "unsupported expression")
+(check-error (eval-expression "7") WRONG)
 
 (check-expect (eval-expression (make-add -1 2)) (+ -1 2))
 (check-expect (eval-expression (make-add (make-mul -2 -3) 33)) (+ (* -2 -3) 33))
@@ -22,7 +24,7 @@
     [(mul? exp)
      (* (eval-expression (mul-left exp)) (eval-expression (mul-right exp)))]
     [(number? exp) exp]
-    [else (error "unsupported expression")]))
+    [else (error WRONG)]))
 
 (define-struct and-bool [left right])
 (define-struct or-bool [left right])
@@ -40,7 +42,7 @@
 (check-expect (eval-bool-expression (make-or-bool #true (make-not-bool #false))) #true)
 (check-expect (eval-bool-expression (make-or-bool #false (make-not-bool #true))) #false)
 
-(check-error (eval-bool-expression "true") "unsupported expression")
+(check-error (eval-bool-expression "true") WRONG)
 
 (define (eval-bool-expression exp)
   (cond
@@ -51,11 +53,9 @@
     [(not-bool? exp)
      (not (eval-bool-expression (not-bool-exp exp)))]
     [(boolean? exp) exp]
-    [else (error "unsupported expression")]))
+    [else (error WRONG)]))
 
 ; Figure 125: From S-expr to BSL-expr
-
-(define WRONG "invalid expression")
 
 ; Any -> Boolean
 (define (atom? x)
@@ -125,3 +125,48 @@
 
 (define (interpreter-expression exp)
   (eval-expression (parse exp)))
+
+(check-expect (subst (make-add 2 5) 'x 3) (make-add 2 5))
+(check-expect (subst (make-add 2 'x) 'x 3) (make-add 2 3))
+(check-expect (subst (make-mul 2 'x) 'x 3) (make-mul 2 3))
+(check-expect (subst (make-mul 'y 3) 'x 3) (make-mul 'y 3))
+(check-expect (subst (make-mul 'y (make-add (make-mul 'x 2) 'x)) 'x 3) (make-mul 'y (make-add (make-mul 3 2) 3)))
+
+(define (subst exp sym val)
+  (cond
+    [(add? exp)
+     (make-add (subst (add-left exp) sym val) (subst (add-right exp) sym val))]
+    [(mul? exp)
+     (make-mul (subst (mul-left exp) sym val) (subst (mul-right exp) sym val))]
+    [(and (symbol? exp) (symbol=? exp sym)) val]
+    [else exp]))
+
+(check-expect (numeric? (make-add 1 2)) #true)
+(check-expect (numeric? (make-add 'x 2)) #false)
+(check-expect (numeric? (make-mul 4 (make-add 2 3))) #true)
+(check-expect (numeric? (make-mul 4 (make-add 'z 3))) #false)
+
+(define (numeric? exp)
+  (cond
+    [(symbol? exp) #false]
+    [(add? exp)
+     (and (numeric? (add-left exp)) (numeric? (add-right exp)))]
+    [(mul? exp)
+     (and (numeric? (mul-left exp)) (numeric? (mul-right exp)))]
+    [(number? exp) #true]))
+
+(check-expect (eval-variable 2) 2)
+(check-expect (eval-variable (make-add 2 3)) 5)
+(check-expect (eval-variable (make-mul 2 3)) 6)
+(check-expect (eval-variable (make-mul (make-add 1 2) (make-mul 3 4))) 36)
+
+(check-error (eval-variable (make-mul 'x 3)) WRONG)
+(check-error (eval-variable (make-mul (make-add 1 'x) 3)) WRONG)
+(check-error (eval-variable 'x) WRONG)
+
+(define (eval-variable exp)
+  (if (numeric? exp)
+      (eval-expression exp)
+      (error WRONG)))
+
+; TODO 355
