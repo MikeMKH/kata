@@ -170,3 +170,30 @@
       (error WRONG)))
 
 ; TODO 355
+
+(define-struct function [name expression])
+
+(check-expect (function-name (make-function 'k (make-add 1 1))) 'k)
+(check-expect (mul-left (make-mul 5 (make-function 'k (make-add 1 1)))) 5)
+(check-expect (eval-expression (function-expression (mul-right (make-mul (make-function 'i 5) (make-function 'k (make-add 1 1)))))) 2)
+
+(check-expect (eval-definition1 3 'f 'x (make-mul 'x 'x)) 3)
+(check-expect (eval-definition1 (make-function 'f (make-add 1 2)) 'f 'x (make-mul 'x 'x)) 9)
+(check-expect (eval-definition1 (make-function 'g 3) 'g 'y (make-add (make-add 2 'y) (make-mul 3 'y))) 14)
+
+(check-error (eval-definition1 (make-function 'g (make-add 1 2)) 'f 'x (make-mul 'x 'x)) WRONG)
+
+(define (eval-definition1 exp f x b)
+  (cond
+    [(number? exp) exp]
+    [(add? exp)
+     (+ (eval-definition1 (add-left exp) f x b) (eval-definition1 (add-right exp) f x b))]
+    [(mul? exp)
+     (* (eval-definition1 (mul-left exp) f x b) (eval-definition1 (mul-right exp) f x b))]
+    [(function? exp)
+     (if (symbol=? (function-name exp) f)
+         (eval-definition1
+          (subst b x (function-expression exp)) f x b)
+         (error WRONG))]))
+
+; TODO 358 - 359
