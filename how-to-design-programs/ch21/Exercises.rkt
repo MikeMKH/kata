@@ -197,3 +197,23 @@
          (error WRONG))]))
 
 ; TODO 358 - 359
+
+(define-struct constant [name value])
+
+(check-expect (constant-value (make-constant 'close-to-pi 3.14)) 3.14)
+(check-expect (constant-name (make-constant 'area (make-function 'f (make-mul (make-constant 'pi 3.14) (make-mul 'r 'r))))) 'area)
+
+(check-expect (lookup-constant-def (list (make-constant 'x 2)) 'x) (make-constant 'x 2))
+(check-expect (lookup-constant-def (list (make-constant 'hay-stack "nope") (make-constant 'needle "yep")) 'needle) (make-constant 'needle "yep"))
+
+(check-error (lookup-constant-def '() 'x) WRONG)
+(check-error (lookup-constant-def (list (make-constant 'x 2)) 'y) WRONG)
+
+(define (lookup-constant-def da x)
+  (cond
+    [(empty? da) (error WRONG)]
+    [else (if (equal? (constant-name (first da)) x)
+              (first da)
+              (lookup-constant-def (rest da) x))]))
+
+; TODO 361 - 362
