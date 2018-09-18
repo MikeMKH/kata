@@ -169,7 +169,7 @@
       (eval-expression exp)
       (error WRONG)))
 
-; TODO 355
+; skipped 355
 
 (define-struct function [name expression])
 
@@ -196,7 +196,7 @@
           (subst b x (function-expression exp)) f x b)
          (error WRONG))]))
 
-; TODO 358 - 359
+; skipped 358 - 359
 
 (define-struct constant [name value])
 
@@ -216,4 +216,4 @@
               (first da)
               (lookup-constant-def (rest da) x))]))
 
-; TODO 361 - 362
+; skipped 361 - 362
