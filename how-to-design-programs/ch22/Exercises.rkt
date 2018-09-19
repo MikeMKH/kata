@@ -72,3 +72,84 @@
              (rest optional-loa+content)))])))
 
 ; skipped 367 - 369
+
+(check-expect (word? '(word ((text "a")))) #true)
+(check-expect (word? '(word ((text "b")))) #true)
+(check-expect (word? '(not-word ((text "a")))) #false)
+
+(define (word? w)
+  (and (cons? w)
+       (equal? (first w) 'word)))
+
+(check-expect (word-text '(word ((text "a")))) "a")
+(check-expect (word-text '(word ((text "b")))) "b")
+
+(define (word-text w)
+  (second (first (second w))))
+
+; skipped 371 - 372
+
+(require 2htdp/image)
+
+; Figure 128
+
+(define SIZE 12) ; font size 
+(define COLOR "black") ; font color 
+(define BT ; a graphical constant 
+  (beside (circle 1 'solid 'black) (text " " SIZE COLOR)))
+ 
+; Image -> Image
+; marks item with bullet  
+(define (bulletize item)
+  (beside/align 'center BT item))
+ 
+; XEnum.v2 -> Image
+; renders an XEnum.v2 as an image 
+(define (render-enum xe)
+  (local ((define content (xexpr-content xe))
+          ; XItem.v2 Image -> Image 
+          (define (deal-with-one item so-far)
+            (above/align 'left (render-item item) so-far)))
+    (foldr deal-with-one empty-image content)))
+ 
+; XItem.v2 -> Image
+; renders one XItem.v2 as an image 
+(define (render-item an-item)
+  (local ((define content (first (xexpr-content an-item))))
+    (bulletize
+      (cond
+        [(word? content)
+         (text (word-text content) SIZE 'black)]
+        [else (render-enum content)]))))
+
+(define u0
+  '(ul
+    (li (word ((text "one"))))
+    (li (word ((text "two"))))))
+
+(define u0-rendered
+  (above/align
+   'left
+   (beside/align 'center BT (text "one" 12 'black))
+   (beside/align 'center BT (text "two" 12 'black))))
+
+(define u1
+  '(ul
+    (li (word ((text "one"))))
+    (li (word ((text "two"))))
+    (ul
+     (li (word ((text "a"))))
+     (li (word ((text "b"))))
+     (ul
+      (ul
+       (li (word ((text "*"))))
+       (li (word ((text "#")))))
+      (li (word ((text "i"))))
+      (li (word ((text "ii"))))
+      ))))
+
+(check-expect
+ (bulletize (text "one" SIZE 'black))
+ (beside/align 'center BT (text "one" SIZE 'black)))
+
+; TODO render-enum and render-item
