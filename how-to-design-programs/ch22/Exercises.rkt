@@ -122,34 +122,38 @@
          (text (word-text content) SIZE 'black)]
         [else (render-enum content)]))))
 
-(define u0
-  '(ul
-    (li (word ((text "one"))))
-    (li (word ((text "two"))))))
-
-(define u0-rendered
-  (above/align
-   'left
-   (beside/align 'center BT (text "one" 12 'black))
-   (beside/align 'center BT (text "two" 12 'black))))
-
-(define u1
-  '(ul
-    (li (word ((text "one"))))
-    (li (word ((text "two"))))
-    (ul
-     (li (word ((text "a"))))
-     (li (word ((text "b"))))
-     (ul
-      (ul
-       (li (word ((text "*"))))
-       (li (word ((text "#")))))
-      (li (word ((text "i"))))
-      (li (word ((text "ii"))))
-      ))))
-
 (check-expect
  (bulletize (text "one" SIZE 'black))
  (beside/align 'center BT (text "one" SIZE 'black)))
 
-; TODO render-enum and render-item
+(check-expect
+ (render-item '(li (word ((text "one")))))
+ (beside/align 'center BT (text "one" SIZE 'black)))
+
+(check-expect
+ (render-enum '(ul (li (word ((text "one"))))))
+ (bulletize (text "one" SIZE 'black)))
+
+(check-expect
+ (render-enum '(ul
+                (li (word ((text "one"))))
+                (li (word ((text "two"))))
+                (li (word ((text "three"))))))
+ (above/align 'left (bulletize (text "one" SIZE 'black))
+              (above/align 'left (bulletize (text "two" SIZE 'black))
+                           (above/align 'left (bulletize (text "three" SIZE 'black)) empty-image))))
+
+(check-expect
+ (render-enum '(ul
+                (li (word ((text "one"))))
+                (li (word ((text "two"))))
+                (li (ul
+                 (li (word ((text "a"))))
+                 (li (word ((text "b"))))))))
+ (above/align 'left (bulletize (text "one" SIZE 'black))
+              (above/align 'left (bulletize (text "two" SIZE 'black))
+                           (bulletize (above/align 'left (bulletize (text "a" SIZE 'black))
+                                                   (above/align 'left (bulletize (text "b" SIZE 'black)) empty-image))))))
+
+
+ ; skipped 374 - 377
