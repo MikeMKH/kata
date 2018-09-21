@@ -155,5 +155,95 @@
                            (bulletize (above/align 'left (bulletize (text "a" SIZE 'black))
                                                    (above/align 'left (bulletize (text "b" SIZE 'black)) empty-image))))))
 
+ ; skipped 374 - 378
 
- ; skipped 374 - 377
+(require 2htdp/universe)
+(require 2htdp/image)
+
+; Figure 129
+
+; An FSM is a [List-of 1Transition]
+; A 1Transition is a list of two items:
+;   (cons FSM-State (cons FSM-State '()))
+; An FSM-State is a String that specifies a color
+ 
+; data examples 
+(define fsm-traffic
+  '(("red" "green") ("green" "yellow") ("yellow" "red")))
+ 
+; FSM FSM-State -> FSM-State 
+; matches the keys pressed by a player with the given FSM 
+(define (simulate state0 transitions)
+  (big-bang state0 ; FSM-State
+    [to-draw
+      (lambda (current)
+        (square 100 "solid" current))]
+    [on-key
+      (lambda (current key-event)
+        (find transitions current))]))
+ 
+; [X Y] [List-of [List X Y]] X -> Y
+; finds the matching Y for the given X in alist
+(define (find alist x)
+  (local ((define fm (assoc x alist)))
+    (if (cons? fm) (second fm) (error "not found"))))
+
+(check-error (find '(("nothing" "here")) "anything") "not found")
+
+(check-expect (find '(("something" "value")) "something") "value")
+(check-expect (find '(("not here" "wrong") ("here" "value") ("not here either" "wrong")) "here") "value")
+
+; skipped 380 - 381
+
+; Figure 130
+
+(define xm0
+  '(machine ((initial "red"))
+     (action ((state "red") (next "green")))
+     (action ((state "green") (next "yellow")))
+     (action ((state "yellow") (next "red")))))
+
+; XMachine -> FSM-State 
+; interprets the given configuration as a state machine 
+(define (simulate-xmachine xm)
+  (simulate (xm-state0 xm) (xm->transitions xm)))
+ 
+; XMachine -> FSM-State 
+; extracts and translates the transition table from xm0
+ 
+(check-expect (xm-state0 xm0) "red")
+ 
+(define (xm-state0 xm0)
+  (find-attr (xexpr-attr xm0) 'initial))
+
+(check-expect (find-attr '() 'something) #false)
+(check-expect (find-attr '((not-here nothin) (here value)) 'here) 'value)
+
+(define (find-attr l s)
+  (cond
+   [(empty? l) #false]
+   [else (if (equal? (first (first l)) s)
+             (second (first l))
+             (find-attr (rest l) s))]))
+ 
+; XMachine -> [List-of 1Transition]
+; extracts the transition table from xm
+ 
+(check-expect (xm->transitions xm0) fsm-traffic)
+ 
+(define (xm->transitions xm)
+  (local (; X1T -> 1Transition
+          (define (xaction->action xa)
+            (list (find-attr (xexpr-attr xa) 'state)
+                  (find-attr (xexpr-attr xa) 'next))))
+    (map xaction->action (xexpr-content xm))))
+
+(define bw
+  '(machine ((initial "black"))
+     (action ((state "black") (next "white")))
+     (action ((state "white") (next "black")))))
+
+(check-expect (xm-state0 bw) "black")
+
+(check-expect (xm->transitions bw)
+              '(("black" "white") ("white" "black")))
