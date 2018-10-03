@@ -21,6 +21,9 @@
 (define-struct employee [name ssn pay-rate])
 (define-struct work [name hours])
 
+(check-expect '()
+ (weekly-wage (make-work "not found" 40) (list (make-employee "Bob" "123-45-6789" 5.50))))
+
 (check-expect '("Bob" 220)
  (weekly-wage (make-work "Bob" 40) (list (make-employee "Bob" "123-45-6789" 5.50))))
 
@@ -38,11 +41,31 @@
                   (work-hours hours)))
          (weekly-wage hours (rest employees)))]))
 
-; TODO 388
-(define (wages*.v2 hours employees)
+(check-expect '(("Bob" 220) ("Jim" 226))
+              (wages* (list (make-work "Bob" 40) (make-work "Jim" 40))
+                      (list (make-employee "Jim" "111-11-1111" 5.65) (make-employee "Bob" "123-45-6789" 5.5))))
+
+(check-expect '(() ("Jim" 226))
+              (wages* (list (make-work "unknown" 40) (make-work "Jim" 40))
+                      (list (make-employee "Jim" "111-11-1111" 5.65) (make-employee "Bob" "123-45-6789" 5.5))))
+
+(define (wages* hours employees)
   (cond
     [(empty? hours) '()]
     [else
      (cons
        (weekly-wage (first hours) employees)
-       (wages*.v2 (rest hours) employees))]))
+       (wages* (rest hours) employees))]))
+
+(check-expect '(('a 1) ('b 2)) (zip '('a 'b) '(1 2)))
+(check-expect '(('a 1)) (zip '('a) '(1 2)))
+(check-expect '(('a 1)) (zip '('a 'b) '(1)))
+(check-expect '() (zip '() '()))
+
+(define (zip xs ys)
+  (cond
+    [(or (empty? xs)
+         (empty? ys)) '()]
+    [else
+     (cons (list (first xs) (first ys))
+           (zip (rest xs) (rest ys)))]))
