@@ -69,3 +69,35 @@
     [else
      (cons (list (first xs) (first ys))
            (zip (rest xs) (rest ys)))]))
+
+(define-struct branch [left right])
+
+(check-expect (tree-pick 'a '()) 'a)
+(check-expect (tree-pick (make-branch 'l 'r) '(left)) 'l)
+(check-expect (tree-pick (make-branch 'l 'r) '(right)) 'r)
+(check-expect 'yass
+              (tree-pick (make-branch (make-branch (make-branch 'no (make-branch 'yass 'no)) 'no) 'no) '(left left right left)))
+
+(check-error (tree-pick 'a '(left)) "found symbol instead of branch")
+(check-error (tree-pick (make-branch 'no 'no) '()) "found branch instead of symbol")
+
+(define (tree-pick tree path)
+  (cond
+    [(and
+      (empty? path)
+      (symbol? tree)) tree]
+    [(and
+      (not (empty? path))
+      (not (symbol? tree)))
+     (local ((define direction (first path)))
+       (tree-pick
+        (cond
+          [(equal? 'left direction) (branch-left tree)]
+          [(equal? 'right direction) (branch-right tree)])
+        (rest path)))]
+    [(symbol? tree)
+     (error "found symbol instead of branch")]
+    [(empty? path)
+     (error "found branch instead of symbol")]
+    [else
+     (error "beep boop beep: error")]))
