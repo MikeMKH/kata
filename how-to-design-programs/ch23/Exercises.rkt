@@ -97,7 +97,27 @@
         (rest path)))]
     [(symbol? tree)
      (error "found symbol instead of branch")]
-    [(empty? path)
-     (error "found branch instead of symbol")]
     [else
-     (error "beep boop beep: error")]))
+     (error "found branch instead of symbol")]))
+
+(check-expect (replace-eol-with '() 2) '(2))
+(check-expect (replace-eol-with (cons 1 '()) 2) '(1 2))
+
+(define (replace-eol-with col with)
+  (cond
+    [(empty? col) (list with)]
+    [else (cons (first col) (replace-eol-with (rest col) with))]))
+
+(check-expect (union '() '()) '())
+(check-expect (union '() '(1)) '(1))
+(check-expect (union '(1) '()) '(1))
+(check-expect (sort (union '(1 2 3) '(3 4 5)) <) '(1 2 3 4 5))
+(check-expect (sort (union '(1 2 3 4 5) '(1 2 3 4 5)) <) '(1 2 3 4 5))
+
+(define (union s1 s2)
+  (cond
+    [(empty? s2) s1]
+    [(empty? s1) s2]
+    [else (if (member? (first s2) s1)
+              (union s1 (rest s2))
+              (cons (first s2) (union s1 (rest s2))))]))
