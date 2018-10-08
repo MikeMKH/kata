@@ -121,3 +121,79 @@
     [else (if (member? (first s2) s1)
               (union s1 (rest s2))
               (cons (first s2) (union s1 (rest s2))))]))
+
+(check-expect (intersect '() '()) '())
+(check-expect (intersect '() '(1)) '())
+(check-expect (intersect '(1) '()) '())
+(check-expect (intersect '(1) '(1)) '(1))
+(check-expect (intersect '(1 2) '(1 3)) '(1))
+(check-expect (intersect '(1 2 3 4 5) '(1 3 5 7)) '(1 3 5))
+
+(define (intersect s1 s2)
+  (cond
+    [(or (empty? s1) (empty? s2)) '()]
+    [else
+     (if (member? (first s2) s1)
+         (cons (first s2) (intersect s1 (rest s2)))
+         (intersect s1 (rest s2)))]))
+
+(check-expect (sort<? '()) #true)
+(check-expect (sort<? '(1)) #true)
+(check-expect (sort<? '(1 2 3)) #true)
+(check-expect (sort<? '(1 3 2)) #false)
+
+(define (sort<? lon)
+  (cond
+    [(or (empty? lon) (empty? (rest lon))) #true]
+    [else
+     (if (or (= (first lon) (second lon))
+             (< (first lon) (second lon)))
+         (sort<? (rest lon))
+         #false)]))
+
+(check-satisfied (merge '(1 2 3 4 5) '(4 5 6 7 8 9)) sort<?)
+(check-expect (merge '() '()) '())
+(check-expect (merge '(1) '()) '(1))
+(check-expect (merge '() '(1)) '(1))
+(check-expect (merge '(1) '(1)) '(1 1))
+(check-expect (merge '(1 2) '(1 3)) '(1 1 2 3))
+
+(define (merge s1 s2)
+  (cond
+    [(empty? s1) s2]
+    [(empty? s2) s1]
+    [else
+     (local (
+             (define elm1 (first s1))
+             (define elm2 (first s2)))
+       (if (or (= elm1 elm2) (< elm1 elm2))
+           (cons elm1 (merge (rest s1) s2))
+           (cons elm2 (merge s1 (rest s2)))))]))
+
+(check-expect (take '() 1) '())
+(check-expect (take '(1) 1) '(1))
+(check-expect (take '(1) 2) '(1))
+(check-expect (take '(1 2) 1) '(1))
+(check-expect (take '(1 2) 2) '(1 2))
+
+(define (take col n)
+  (cond
+    [(or (empty? col)
+         (zero? n)) '()]
+    [else
+     (cons (first col) (take (rest col) (sub1 n)))]))
+
+(check-expect (drop '() 1) '())
+(check-expect (drop '(1) 1) '())
+(check-expect (drop '(1) 2) '())
+(check-expect (drop '(1 2) 1) '(2))
+(check-expect (drop '(1 2 3 4 5 6 7 8 9) 3) '(4 5 6 7 8 9))
+
+(define (drop col n)
+  (cond
+    [(or (empty? col)
+         (zero? n)) col]
+    [else
+     (drop (rest col) (sub1 n))]))
+
+; skipped 396 - 402
