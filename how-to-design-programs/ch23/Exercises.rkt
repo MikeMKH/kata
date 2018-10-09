@@ -196,4 +196,22 @@
     [else
      (drop (rest col) (sub1 n))]))
 
-; skipped 396 - 402
+; skipped 396 - 403
+
+(check-expect (andmap2 (lambda (x y) #true) '() '()) #true)
+(check-expect (andmap2 (lambda (x y) #false) '() '()) #true)
+(check-expect (andmap2 (lambda (x y) #true) '(1 2 3) '(a b c)) #true)
+(check-expect (andmap2 (lambda (x y) #false) '(1 2 3) '(a b c)) #false)
+(check-expect (andmap2 (lambda (x y) (< x (+ x y))) '(1 2 3) '(4 5 6)) #true)
+(check-expect (andmap2 (lambda (x y) (< x (+ x y))) '(1 2 3) '(4 -5 6)) #false)
+
+(define (andmap2 p? xs ys)
+  (cond
+    [(or (empty? xs)
+         (empty? ys)) #true]
+    [else
+     (if (p? (first xs) (first ys))
+         (andmap2 p? (rest xs) (rest ys))
+         #false)]))
+
+(check-expect (row-filter 
