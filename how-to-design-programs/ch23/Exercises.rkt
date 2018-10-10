@@ -196,7 +196,29 @@
     [else
      (drop (rest col) (sub1 n))]))
 
-; skipped 396 - 403
+(check-expect (compare-word "a" "_" "a") "a")
+(check-expect (compare-word "a" "_" "b") "_")
+(check-expect (compare-word "" "" "n") "")
+(check-expect (compare-word "nope" "_o_e" "p") "_ope")
+(check-expect (compare-word "nope" "____" "p") "__p_")
+
+(define (compare-word word guess g)
+  (local (
+          (define word-letters (explode word))
+          (define guess-letters (explode guess))
+          (define (replace-letters ws gs l)
+            (cond
+              [(empty? ws) ""]
+              [else
+               (string-append
+                (if (string=? (first ws) l)
+                    l
+                    (first gs))
+                (replace-letters (rest ws) (rest gs) l))])))
+    (replace-letters word-letters guess-letters g)))
+                
+
+; skipped 397 - 403
 
 (check-expect (andmap2 (lambda (x y) #true) '() '()) #true)
 (check-expect (andmap2 (lambda (x y) #false) '() '()) #true)
@@ -214,4 +236,4 @@
          (andmap2 p? (rest xs) (rest ys))
          #false)]))
 
-(check-expect (row-filter 
+; skipped 405 - 411
