@@ -76,3 +76,64 @@
         (add1 exp))]
       [else
        (create-inex sum sign exp)])))
+
+(check-expect
+ (inex* (create-inex 2 1 0)
+        (create-inex 3 1 0))
+ (create-inex 6 1 0))
+
+(check-expect
+ (inex* (create-inex 3 1 0)
+        (create-inex 4 1 0))
+ (create-inex 12 1 0))
+
+(check-expect
+ (inex* (create-inex 3 1 0)
+        (create-inex 3 -1 0))
+ (create-inex 9 -1 0))
+
+(check-expect
+ (inex* (create-inex 2 1 90)
+        (create-inex 3 1 9))
+ (create-inex 6 1 99))
+
+(check-expect
+ (inex* (create-inex 2 1 99)
+        (create-inex 3 1 0))
+ (create-inex 6 1 99))
+
+(check-error
+ (inex* (create-inex 2 1 99)
+        (create-inex 3 1 1))
+ "overflow")
+
+(check-error
+ (inex* (create-inex 20 1 0)
+        (create-inex  5 1 0))
+ "overflow")
+
+(define (inex* a b)
+  (local (
+          (define product (* (inex-mantissa a) (inex-mantissa b)))
+          (define sign (* (inex-sign a) (inex-sign b)))
+          (define exponent (+ (inex-exponent a) (inex-exponent b))))
+    (cond
+      [(or
+        (> product 99)
+        (> exponent 99))
+       (error "overflow")]
+      [else
+       (create-inex product sign exponent)])))
+
+; skipped 414
+
+(define (find-limit n)
+  (if (= (expt #i10. (+ n 1)) #i+inf.0)
+      n
+      (find-limit (add1 n))))
+
+(check-within (expt #i10.0 308) #i1e+308 0.0001)
+; (check-expect (expt #i10.0 309) #i+inf.0) ; check-expect cannot compare inexact numbers
+(check-expect (find-limit 0) 308)
+
+; skipped 416 - 420
