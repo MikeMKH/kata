@@ -55,3 +55,59 @@
 
 (define (partition s n)
   (bundle (explode s) n))
+
+; skipped 424 - 425
+
+; Figure 149: The quick-sort algorithm
+
+; [List-of Number] -> [List-of Number]
+; produces a sorted version of alon
+; assume the numbers are all distinct 
+(define (quick-sort< alon)
+  (cond
+    ;[(empty? alon) '()]
+    [(or (empty? alon)
+         (empty? (rest alon))) alon]
+    [else (local ((define pivot (first alon)))
+            (append (quick-sort< (smallers alon pivot))
+                    (equal alon pivot)
+                    ;(list pivot)
+                    (quick-sort< (largers alon pivot))))]))
+ 
+; [List-of Number] Number -> [List-of Number]
+(define (largers alon n)
+  (filter (lambda (x) (> x n)) alon))
+ 
+; [List-of Number] Number -> [List-of Number]
+(define (smallers alon n)
+  (filter (lambda (x) (< x n)) alon))
+
+; [List-of Number] Number -> [List-of Number]
+(define (equal alon n)
+  (filter (lambda (x) (= x n)) alon))
+
+(check-expect (quick-sort< '(1)) '(1))
+(check-expect (quick-sort< '(2 1 4 3)) '(1 2 3 4))
+
+; skipped 427
+
+(check-expect (quick-sort< '(1 1)) '(1 1))
+
+(check-expect (other-sort '(1) <) '(1))
+(check-expect (other-sort '(2 1 4 3) <) '(1 2 3 4))
+(check-expect (other-sort '(1 1) <) '(1 1))
+
+(define (other-sort lon f)
+  (cond
+    [(or (empty? lon)
+         (empty? (rest lon))) lon]
+    [else (local ((define pivot (first lon))
+                  (define greater (filter
+                                   (lambda (x) (f x pivot)) lon))
+                  (define lesser (filter
+                                  (lambda (x) (not (or (f x pivot)
+                                                       (equal? x pivot)))) lon))
+                  (define same (filter (lambda (x) (equal? x pivot)) lon)))
+            (append (other-sort greater f)
+                    same
+                    (other-sort lesser f)))]))
