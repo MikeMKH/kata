@@ -47,3 +47,70 @@
     [else (drop (rest l) (sub1 n))]))
 
 ; skipped 434 - 436
+
+; Figure 153: From generative to structural recursion
+
+; (define (general P)
+;   (cond
+;     [(trivial? P) (solve P)]
+;     [else
+;      (combine-solutions
+;        P
+;        (general
+;          (generate P)))]))
+
+; (define (special P)
+;   (cond
+;     [(empty? P) (solve P)]
+;     [else
+;      (combine-solutions
+;        P
+;        (special (rest P)))]))
+
+(check-expect (count '()) 0)
+(check-expect (count '(1)) 1)
+(check-expect (count '(1 2 3)) 3)
+(check-expect (count '(a b c)) 3)
+
+(define (count l)
+  (cond
+    [(empty? l) 0]
+    [else
+     (add1 (count (rest l)))]))
+
+(check-expect (negate '()) '())
+(check-expect (negate '(1)) '(-1))
+(check-expect (negate '(-1)) '(1))
+(check-expect (negate '(-1 2 -3 4 -5)) '(1 -2 3 -4 5))
+
+(define (negate lon)
+  (cond
+    [(empty? lon) '()]
+    [else
+     (cons (- (first lon))
+           (negate (rest lon)))]))
+
+(check-expect (upper '()) '())
+(check-expect (upper '("A")) '("A"))
+(check-expect (upper '("a")) '("A"))
+(check-expect (upper '("aT")) '("AT"))
+(check-expect (upper '("aT" "CaT" "mac" "FACT")) '("AT" "CAT" "MAC" "FACT"))
+
+(define (upper los)
+  (cond
+    [(empty? los) '()]
+    [else
+     (cons (string-upcase (first los))
+           (upper (rest los)))]))
+
+(check-expect (add 0 1) 1)
+(check-expect (add 1 1) 2)
+(check-expect (add 2 1) 3)
+(check-expect (add 5 3) 8)
+(check-expect (add 41 42) (add 42 41))
+
+(define (add n m)
+  (cond
+    [(zero? n) m]
+    [else
+     (add1 (add (sub1 n) m))]))
