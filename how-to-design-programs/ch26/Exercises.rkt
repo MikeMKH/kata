@@ -114,3 +114,80 @@
     [(zero? n) m]
     [else
      (add1 (add (sub1 n) m))]))
+
+; skipped 438
+
+; Figure 154: Finding the greatest common divisor via structural recursion
+
+(define (gcd-structural n m)
+  (local (; N -> N
+          ; determines the gcd of n and m less than i
+          (define (greatest-divisor-<= i)
+            (cond
+              [(= i 1) 1]
+              [else
+               (if (= (remainder n i) (remainder m i) 0)
+                   i
+                   (greatest-divisor-<= (- i 1)))])))
+    (greatest-divisor-<= (min n m))))
+
+(check-expect (gcd-structural 12 9) 3)
+(check-expect (gcd-structural 13 9) 1)
+
+; (time (gcd-structural 101135853 45014640))
+; cpu time: 6197 real time: 6193 gc time: 17
+
+; Figure 155: Finding the greatest common divisor via generative recursion
+
+(define (gcd-generative n m)
+  (local (; N[>= 1] N[>=1] -> N
+          ; generative recursion
+          ; (gcd L S) == (gcd S (remainder L S)) 
+          (define (clever-gcd L S)
+            (cond
+              [(= S 0) L]
+              [else (clever-gcd S (remainder L S))])))
+    (clever-gcd (max m n) (min m n))))
+
+(check-expect (gcd-generative 101135853 45014640) 177)
+
+; (time (gcd-generative 101135853 45014640))
+; cpu time: 0 real time: 0 gc time: 0
+
+; skipped 441 - 443
+
+(check-expect (divisors 0 1) '())
+(check-expect (divisors 1 1) '(1))
+(check-expect (divisors 1 2) '(1))
+(check-expect (divisors 2 2) '(2 1))
+(check-expect (divisors 2 3) '(1))
+(check-expect (divisors 6 6) '(6 3 2 1))
+
+(define (divisors k l)
+  (cond
+    [(zero? k) '()]
+    [else
+     (if (zero? (remainder l k))
+         (cons k (divisors (sub1 k) l))
+         (divisors (sub1 k) l))]))
+
+(check-expect (largest-common '() '()) #false)
+(check-expect (largest-common '(1) '()) #false)
+(check-expect (largest-common '() '(1)) #false)
+(check-expect (largest-common '(1) '(1)) 1)
+(check-expect (largest-common '(1) '(2 1)) 1)
+(check-expect (largest-common '(2 1) '(1)) 1)
+(check-expect (largest-common '(2 1) '(2 1)) 2)
+(check-expect (largest-common '(2 1) '(6 3 2 1)) 2)
+(check-expect (largest-common '(6 3 2 1) '(2 1)) 2)
+
+; assumes that k and l are sorted in descending order
+(define (largest-common k l)
+  (cond
+    [(or (empty? k)
+         (empty? l)) #false]
+    [(= (first k) (first l)) (first k)]
+    [else
+     (if (> (first k) (first l))
+         (largest-common (rest k) l)
+         (largest-common k (rest l)))]))
