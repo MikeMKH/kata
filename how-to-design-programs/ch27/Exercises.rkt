@@ -55,4 +55,56 @@
 (check-satisfied (find-root poly 0 3) (create-check poly))
 (check-satisfied (find-root poly 3 5) (create-check poly))
 
-; skipped 450 - 451
+; skipped 450 - 453
+
+(check-expect (take 1 '()) '())
+(check-expect (take 1 '(1)) '(1))
+(check-expect (take 1 '(1 2)) '(1))
+(check-expect (take 0 '(1 2)) '())
+(check-expect (take 2 '(1 2)) '(1 2))
+(check-expect (take 2 '(1 2 3)) '(1 2))
+
+(define (take n l)
+  (cond
+    [(or (empty? l)
+         (zero? n)) '()]
+    [else (cons (first l)
+                (take (sub1 n) (rest l)))]))
+
+(check-expect (drop 1 '()) '())
+(check-expect (drop 1 '(1)) '())
+(check-expect (drop 1 '(1 2)) '(2))
+(check-expect (drop 0 '(1 2)) '(1 2))
+(check-expect (drop 2 '(1 2)) '())
+(check-expect (drop 2 '(1 2 3)) '(3))
+
+(define (drop n l)
+  (cond
+    [(or (empty? l)
+         (zero? n)) l]
+    [else (drop (sub1 n) (rest l))]))
+
+(check-expect
+ (create-matrix 0 '())
+ '())
+
+(check-expect
+ (create-matrix 1 (list 1))
+ (list (list 1)))
+
+(check-expect
+ (create-matrix 2 (list 1 2 3 4))
+ (list (list 1 2)
+       (list 3 4)))
+
+(check-expect
+ (create-matrix 3 '(1 2 3 4 5 6 7 8 9))
+ (list (list 1 2 3)
+       (list 4 5 6)
+       (list 7 8 9)))
+
+ (define (create-matrix n lon)
+   (cond
+     [(empty? lon) '()]
+     [else (cons (take n lon)
+                 (create-matrix n (drop n lon)))]))
