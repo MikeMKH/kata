@@ -32,3 +32,46 @@
     [else (newton f (root-of-tangent f r1))]))
 
 ; skipped 457
+
+(check-expect (constant 0) 20)
+(check-expect (constant 100) 20)
+
+(define (constant x) 20)
+
+(check-expect (linear 0) 0)
+(check-expect (linear 100) 200)
+
+(define (linear x) (* 2 x))
+
+(check-expect (square 0) 0)
+(check-expect (square 10) 300)
+
+(define (square x) (* 3 (sqr x)))
+
+(check-within (integrate-kepler constant 12 22) 200 ε)
+(check-within (integrate-kepler linear 0 10) 100 ε)
+;(check-within (integrate-kepler square 0 10) 1000 ε) ; gives 1500 not 1000
+
+(define (integrate-kepler f l r)
+  (* (/ 1 2)
+     (- r l)
+     (+ (f l)
+        (f r))))
+
+(check-within (integrate-rectangle constant 12 22) 200 ε)
+(check-within (integrate-rectangle linear 0 10) 100 ε)
+(check-within (integrate-rectangle square 0 10) 1000 ε)
+
+(define (integrate-rectangle f a b)
+  (local ((define r 100)
+          (define w (/ (- b a) r))
+          (define s (/ w 2))
+          (define (helper i)
+            (cond
+              [(= i r) 0]
+              [else
+               (+ (* w (f (+ a (* i w) s)))
+                  (helper (add1 i)))])))
+    (helper 0)))
+
+; skipped 460 - 461
