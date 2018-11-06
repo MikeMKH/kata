@@ -59,6 +59,68 @@
 
 (check-expect (find-path 'A 'G sample-graph) '(A B E F G))
 
-; skipped 473
+; skipped 473 - 478
 
-; TODO 474 - 475
+(define (threatening? qp1 qp2)
+  (local ((define x1 (posn-x qp1))
+          (define y1 (posn-y qp1))
+          (define x2 (posn-x qp2))
+          (define y2 (posn-y qp2)))
+    (or
+     (= x1 x2)
+     (= y1 y2)
+     (= (abs (- x1 x2))
+        (abs (- y1 y2))))))
+
+(check-expect (threatening? (make-posn 1 1) (make-posn 1 2)) #true)
+(check-expect (threatening? (make-posn 1 1) (make-posn 2 1)) #true)
+(check-expect (threatening? (make-posn 1 1) (make-posn 2 2)) #true)
+(check-expect (threatening? (make-posn 3 3) (make-posn 2 2)) #true)
+(check-expect (threatening? (make-posn 1 1) (make-posn 2 4)) #false)
+
+; skipped 480
+
+(define (n-queens-solution? n)
+  (local ((define (not-threatening? lop)
+            (cond
+              [(or (empty? lop)
+                   (empty? (rest lop))) #true]
+              [else
+               (and (andmap
+                     (lambda (q)
+                       (not (threatening? (first lop) q)))
+                       (rest lop))
+                    (not-threatening? (rest lop)))])))
+    (lambda (solution)
+      (and (= n (length solution))
+           (not-threatening? solution)))))
+
+(check-expect #true
+              ((n-queens-solution? 4)
+               (list (make-posn 0 1)
+                     (make-posn 1 3)
+                     (make-posn 2 0)
+                     (make-posn 3 2))))
+
+(check-expect #false
+              ((n-queens-solution? 4)
+               (list (make-posn 0 1)
+                     (make-posn 1 3)
+                     (make-posn 3 0)
+                     (make-posn 3 2))))
+
+(check-expect #false
+              ((n-queens-solution? 4)
+               (list (make-posn 0 1)
+                     (make-posn 1 2)
+                     (make-posn 2 0)
+                     (make-posn 3 2))))
+
+(check-expect #false
+              ((n-queens-solution? 4)
+               (list (make-posn 0 1)
+                     (make-posn 1 3)
+                     (make-posn 2 0)
+                     (make-posn 2 1))))
+
+; skipped 482 - 483
