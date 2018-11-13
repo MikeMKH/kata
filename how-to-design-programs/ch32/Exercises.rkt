@@ -48,3 +48,78 @@
 
 ; (time (!.v1 1000)) ;cpu time: 0 real time: 0 gc time: 0
 ; (time (! 1000))    ;cpu time: 0 real time: 0 gc time: 0
+
+; skipped 498
+
+(check-expect (product '()) 1)
+(check-expect (product '(8)) 8)
+(check-expect (product '(1 2 3)) 6)
+(check-expect (product '(11 3 2 -1)) -66)
+
+(define (product l0)
+  (local ((define (product/a l a)
+            (cond
+              [(empty? l) a]
+              [else
+               (product/a (rest l)
+                          (* (first l) a))])))
+    (product/a l0 1)))
+
+(check-expect (how-many '()) 0)
+(check-expect (how-many '(a)) 1)
+(check-expect (how-many '(a b c)) 3)
+(check-expect (how-many '(a b c (1 2 3))) 4)
+
+(define (how-many l0)
+  (local ((define (how-many/a l a)
+            (cond
+              [(empty? l) a]
+              [else
+               (how-many/a (rest l) (add1 a))])))
+    (how-many/a l0 0)))
+
+(check-within (add-to-pi 0) pi 0.001)
+(check-within (add-to-pi 1) (+ pi 1) 0.001)
+(check-within (add-to-pi 10) (+ pi 10) 0.001)
+
+(define (add-to-pi n0)
+  (local ((define (add-to-pi/a n a)
+            (cond
+              [(zero? n) a]
+              [else
+               (add-to-pi/a (sub1 n) (add1 a))])))
+    (add-to-pi/a n0 pi)))
+
+(check-expect (palindrome '()) '())
+(check-expect (palindrome (explode "abc")) (explode "abcba"))
+(check-expect (palindrome (explode "a")) (explode "a"))
+(check-expect (palindrome (explode "ab")) (explode "aba"))
+
+(define (palindrome l)
+  (local ((define (mirror lne a)
+            (cond
+              [(empty? (rest lne)) a]
+              [else
+               (mirror (rest lne)
+                             (cons (first lne) a))])))
+    (if (empty? l)
+        '()
+        (append l (mirror l '())))))
+
+; skipped 503
+
+(check-expect (to10 '()) 0)
+(check-expect (to10 '(1)) 1)
+(check-expect (to10 '(1 2)) 12)
+(check-expect (to10 '(1 2 5)) 125)
+
+(define (to10 l0)
+  (local ((define (to10/a l a)
+            (cond
+              [(empty? l) a]
+              [else
+               (to10/a (rest l)
+                       (+ (* a 10) (first l)))])))
+    (to10/a l0 0)))
+
+; skipped 505 - 507 :(
