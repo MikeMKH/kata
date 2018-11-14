@@ -122,4 +122,20 @@
                        (+ (* a 10) (first l)))])))
     (to10/a l0 0)))
 
-; skipped 505 - 507 :(
+(check-expect (is-prime 2) #true)
+(check-expect (is-prime 3) #true)
+(check-expect (is-prime 4) #false)
+(check-expect (is-prime 5) #true)
+(check-expect (is-prime 55) #false)
+
+(define (is-prime n0)
+  (local ((define (is-prime/a n a)
+            (cond
+              [(= a 1) #true]
+              [else
+               [if (zero? (remainder n a))
+                   #false
+                   (is-prime/a n (sub1 a))]])))
+    (is-prime/a n0 (integer-sqrt n0))))
+
+; skipped 506 - 507 :(
