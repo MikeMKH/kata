@@ -138,4 +138,29 @@
                    (is-prime/a n (sub1 a))]])))
     (is-prime/a n0 (integer-sqrt n0))))
 
-; skipped 506 - 507 :(
+(check-expect (m*p identity '()) '())
+(check-expect (m*p identity '(1 2 3)) '(1 2 3))
+(check-expect (m*p sub1 '(1 2 3)) '(0 1 2))
+(check-expect (m*p int->string '(97 98 99)) '("a" "b" "c"))
+
+(define (m*p f0 l0)
+  (local ((define (map/a f l a)
+            (cond
+              [(empty? l) (reverse a)]
+              [else
+               (map/a f (rest l) (cons (f (first l)) a))])))
+    (map/a f0 l0 '())))
+
+(check-expect (build-l*st 0 identity) (build-list 0 identity))
+(check-expect (build-l*st 100 identity) (build-list 100 identity))
+(check-expect (build-l*st 1 add1) (build-list 1 add1))
+
+(define (build-l*st n0 f0)
+  (local ((define (build-list/a n f a)
+            (cond
+              [(zero? n) a]
+              [else
+               (build-list/a (sub1 n) f (cons (f (sub1 n)) a))])))
+    (build-list/a n0 f0 '())))
+
+; skipped 508 - 510
