@@ -63,4 +63,33 @@
 (define (app-arg exp)
   (second exp))
 
-; TODO declareds
+(check-expect (declareds '(λ () x)) '())
+(check-expect (declareds '(λ (x) x)) '(x))
+(check-expect (declareds '(λ (x y z) x)) '(x y z))
+(check-expect (declareds '(λ (x x) x)) '(x x))
+(check-expect (declareds '(λ (x y x z x) x)) '(x y x z x))
+
+(define (declareds exp)
+  (second exp))
+
+; skipped 513 - 524
+
+(define-struct p*ir [count left right])
+
+(check-expect (p*ir-count (c*ns 'a '())) 1)
+(check-expect (p*ir-count (c*ns 'a (c*ns 'b '()))) 2)
+(check-error
+ (p*ir-count (c*ns 'a (c*ns 'b '(c d e))))
+ "c*ns: given list that is not p*ir")
+
+(define (c*ns x l)
+  (cond
+    [(empty? l) (make-p*ir 1 x l)]
+    [(p*ir? l) (make-p*ir (add1 (p*ir-count l)) x l)]
+    [else (error "c*ns: given list that is not p*ir")]))
+
+(check-expect (l*ngth (c*ns 'a '())) 1)
+(check-expect (l*ngth (c*ns 'a (c*ns 'b '()))) 2)
+
+(define (l*ngth l)
+  (p*ir-count l))
